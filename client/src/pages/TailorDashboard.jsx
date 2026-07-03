@@ -486,7 +486,7 @@ export default function TailorDashboard() {
       eyebrow="Tailor Dashboard"
       title="Manage boutique operations"
       action={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {activeTab === "measurements" && (
             <button
               onClick={() => {
@@ -772,7 +772,7 @@ export default function TailorDashboard() {
 
                     <div className="mt-3.5 bg-linen/30 border border-black/[0.03] rounded p-3">
                       <p className="text-[9px] uppercase font-bold tracking-wider text-ink/40 mb-1.5">Measurement Parameters (inches)</p>
-                      <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 text-xs text-ink/80">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs text-ink/80 sm:grid-cols-4">
                         {m.values?.chest && <p>Chest: <strong>{m.values.chest}"</strong></p>}
                         {m.values?.waist && <p>Waist: <strong>{m.values.waist}"</strong></p>}
                         {m.values?.hip && <p>Hip: <strong>{m.values.hip}"</strong></p>}

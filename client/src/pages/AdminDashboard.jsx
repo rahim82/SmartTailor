@@ -65,7 +65,7 @@ export default function AdminDashboard() {
     >
       {error && <p className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="GMV (Gross Volume)" value={`₹${(stats.gmv || 0).toLocaleString("en-IN")}`} tone="dark" />
         <StatCard label="Total Orders" value={stats.orders.toString()} tone="stitch" />
         <StatCard label="Boutique Partners" value={stats.tailors.toString()} tone="light" />

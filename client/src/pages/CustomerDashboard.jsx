@@ -368,7 +368,7 @@ export default function CustomerDashboard() {
       eyebrow="Customer Dashboard"
       title="Track orders and reuse measurements"
       action={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
               setMeasurementForm({
@@ -412,10 +412,12 @@ export default function CustomerDashboard() {
     >
       {error && <p className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard label="Active orders" value={activeOrders.toString()} tone="dark" />
         <StatCard label="Saved profiles" value={measurements.length.toString()} tone="stitch" />
-        <StatCard label="Payments pending" value={`₹${totalPendingPayment.toLocaleString("en-IN")}`} tone="saffron" />
+        <div className="col-span-2 sm:col-span-1">
+          <StatCard label="Payments pending" value={`₹${totalPendingPayment.toLocaleString("en-IN")}`} tone="saffron" />
+        </div>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
