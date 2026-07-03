@@ -615,7 +615,7 @@ export default function CustomerDashboard() {
             </button>
             <h3 className="text-xl font-bold border-b border-black/10 pb-3">Place Stitching Order</h3>
             <form onSubmit={handleCreateOrder} className="mt-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Select Tailor Shop</label>
                   <select
@@ -646,7 +646,7 @@ export default function CustomerDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Garment Type</label>
                   <input
@@ -702,7 +702,7 @@ export default function CustomerDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Est. Stitch Charge (₹)</label>
                   <input
@@ -750,7 +750,7 @@ export default function CustomerDashboard() {
               {measurementForm._id ? "Edit Measurement Profile" : "Create Measurement Profile"}
             </h3>
             <form onSubmit={handleCreateMeasurement} className="mt-4 space-y-4">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Profile Name</label>
                   <input
@@ -794,7 +794,7 @@ export default function CustomerDashboard() {
 
               <div className="border-t border-black/5 pt-3">
                 <p className="text-xs font-bold text-stitch mb-2 uppercase tracking-wider">Inches (") values</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {[
                     { key: "chest", label: "Chest" },
                     { key: "waist", label: "Waist" },

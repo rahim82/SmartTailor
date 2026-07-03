@@ -399,7 +399,7 @@ export default function TailorDashboard() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-semibold text-ink/75">Address</label>
                 <input
@@ -425,7 +425,7 @@ export default function TailorDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-semibold text-ink/75">State</label>
                 <input
@@ -526,7 +526,7 @@ export default function TailorDashboard() {
         </div>
       }
     >
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Active Orders" value={stats.activeOrders.toString()} tone="dark" />
         <StatCard label="Shop Status" value={profile?.verificationStatus?.toUpperCase() || "PENDING"} tone="stitch" />
         <StatCard label="Rating" value={`${profile?.ratingAvg || 0} (${profile?.totalReviews || 0} reviews)`} tone="saffron" />
@@ -871,7 +871,7 @@ export default function TailorDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Address</label>
                   <input
@@ -997,7 +997,7 @@ export default function TailorDashboard() {
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Profile Name</label>
                   <input
@@ -1035,7 +1035,7 @@ export default function TailorDashboard() {
 
               <div className="border-t border-black/5 pt-3">
                 <p className="text-xs font-bold text-stitch mb-2 uppercase tracking-wider">Inches (") values</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {[
                     { key: "chest", label: "Chest" },
                     { key: "waist", label: "Waist" },
