@@ -21,8 +21,8 @@ await Promise.all([
 ]);
 
 const passwordHash1 = await bcrypt.hash("Rahim@2002", 12);
-const passwordHash2 = await bcrypt.hash("password12", 12);
-const passwordHash3 = await bcrypt.hash("password13", 12);
+const passwordHash2 = await bcrypt.hash("password123", 12);
+const passwordHash3 = await bcrypt.hash("password123", 12);
 
 const [admin, customer, tailorUser] = await User.create([
   { name: "Admin", phone: "6204466305", email: "smarttailor275@gmail.com", passwordHash: passwordHash1, role: "admin" },

@@ -5,9 +5,9 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { dashboardPath } from "../lib/routes.js";
 
 const demoAccounts = [
-  ["Customer", "customer@smarttailor.test"],
-  ["Tailor", "tailor@smarttailor.test"],
-  ["Admin", "admin@smarttailor.test"]
+  { label: "Customer", email: "customer@smarttailor.test", password: "password123" },
+  { label: "Tailor", email: "tailor@smarttailor.test", password: "password123" },
+  { label: "Admin", email: "smarttailor275@gmail.com", password: "Rahim@2002" }
 ];
 
 export default function AuthPage() {
@@ -60,14 +60,14 @@ export default function AuthPage() {
         <div className="mt-6 rounded-md border border-black/10 bg-white p-4 text-sm shadow-soft">
           <p className="font-semibold">Seed login</p>
           <div className="mt-3 space-y-2">
-            {demoAccounts.map(([label, email]) => (
+            {demoAccounts.map(({ label, email, password }) => (
               <button
                 key={email}
                 onClick={() => {
                   setMode("login");
-                  setForm((current) => ({ ...current, identifier: email, password: "password123" }));
+                  setForm((current) => ({ ...current, identifier: email, password: password }));
                 }}
-                className="flex w-full items-center justify-between rounded bg-black/[0.03] px-3 py-2 text-left"
+                className="flex w-full items-center justify-between rounded bg-black/[0.03] px-3 py-2 text-left hover:bg-black/[0.06] transition"
               >
                 <span>{label}</span>
                 <span className="text-ink/60">{email}</span>
@@ -94,8 +94,12 @@ export default function AuthPage() {
           {mode === "register" && (
             <>
               <div>
-                <label className="text-sm font-medium">Role</label>
-                <select value={role} onChange={(event) => setRole(event.target.value)} className="mt-1 w-full rounded-md border border-black/15 px-3 py-3">
+                <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Role</label>
+                <select 
+                  value={role} 
+                  onChange={(event) => setRole(event.target.value)} 
+                  className="mt-1.5 w-full rounded-lg border border-black/15 bg-black/[0.01] px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
+                >
                   <option value="customer">Customer</option>
                   <option value="tailor">Tailor</option>
                 </select>
@@ -110,7 +114,10 @@ export default function AuthPage() {
           )}
           <Input label="Password" type="password" value={form.password} onChange={(value) => update("password", value)} required />
           {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-          <button disabled={busy} className="w-full rounded-md bg-ink px-4 py-3 font-medium text-white disabled:opacity-60">
+          <button 
+            disabled={busy} 
+            className="w-full rounded-lg bg-ink hover:bg-ink/90 active:scale-[0.99] px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-60 disabled:pointer-events-none"
+          >
             {busy ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
           </button>
         </form>
@@ -122,13 +129,13 @@ export default function AuthPage() {
 function Input({ label, value, onChange, type = "text", required = false }) {
   return (
     <div>
-      <label className="text-sm font-medium">{label}</label>
+      <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">{label}</label>
       <input
         type={type}
         value={value}
         required={required}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1 w-full rounded-md border border-black/15 px-3 py-3 outline-none focus:border-stitch"
+        className="mt-1.5 w-full rounded-lg border border-black/15 bg-black/[0.01] px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
       />
     </div>
   );
