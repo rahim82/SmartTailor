@@ -83,7 +83,81 @@ export default function AdminDashboard() {
           </span>
         </div>
         
-        <div className="overflow-x-auto">
+        {/* Mobile View Card List */}
+        <div className="md:hidden divide-y divide-black/10">
+          {tailors.length === 0 ? (
+            <div className="p-6 text-center text-ink/50">
+              No tailor boutiques registered.
+            </div>
+          ) : (
+            tailors.map((tailor) => {
+              const statusStyles = {
+                pending: "bg-amber-50 text-amber-700 border-amber-200",
+                verified: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                rejected: "bg-red-50 text-red-700 border-red-200"
+              };
+
+              return (
+                <div key={tailor._id} className="p-4 space-y-2.5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-ink text-sm">{tailor.shopName}</h4>
+                      {tailor.description && (
+                        <p className="text-xs text-ink/60 mt-0.5">{tailor.description}</p>
+                      )}
+                    </div>
+                    <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusStyles[tailor.verificationStatus] || "bg-gray-50 text-gray-700"}`}>
+                      {tailor.verificationStatus}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs border-t border-black/5 pt-2.5">
+                    <div>
+                      <p className="text-[10px] text-ink/40 font-semibold uppercase">Location</p>
+                      <p className="font-medium text-ink/80">{tailor.location?.city || "Unknown City"}</p>
+                      <p className="text-[10px] text-ink/50 leading-tight mt-0.5">{tailor.location?.address}, {tailor.location?.pincode}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-ink/40 font-semibold uppercase">Owner Details</p>
+                      <p className="font-medium text-ink/80">{tailor.userId?.name || "No User linked"}</p>
+                      <p className="text-[10px] text-ink/50 mt-0.5">Ph: {tailor.userId?.phone || "N/A"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-1.5 border-t border-black/5 pt-2.5">
+                    {tailor.verificationStatus !== "verified" && (
+                      <button
+                        onClick={() => handleVerify(tailor._id, "verified")}
+                        className="inline-flex items-center justify-center gap-1.5 rounded bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                      >
+                        <Check size={13} /> Verify
+                      </button>
+                    )}
+                    {tailor.verificationStatus !== "rejected" && (
+                      <button
+                        onClick={() => handleVerify(tailor._id, "rejected")}
+                        className="inline-flex items-center justify-center gap-1.5 rounded bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
+                      >
+                        <X size={13} /> Reject
+                      </button>
+                    )}
+                    {tailor.verificationStatus !== "pending" && (
+                      <button
+                        onClick={() => handleVerify(tailor._id, "pending")}
+                        className="text-xs text-stitch hover:underline px-2 py-1.5"
+                      >
+                        Reset to Pending
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop View Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-black/[0.03] text-xs uppercase tracking-wide text-ink/60 border-b border-black/10">
               <tr>

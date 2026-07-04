@@ -562,7 +562,7 @@ export default function CustomerDashboard() {
           </div>
 
           {/* Measurements List */}
-          <div className="rounded-md w-fit border border-black/10 bg-white p-5 shadow-soft">
+          <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
             <div className="flex items-center gap-3 border-b border-black/5 pb-3">
               <Ruler className="text-stitch" />
               <h2 className="font-semibold text-sm text-ink">Measurement Profiles</h2>
