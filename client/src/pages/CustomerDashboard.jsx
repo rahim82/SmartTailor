@@ -642,7 +642,14 @@ export default function CustomerDashboard() {
                   <select
                     required
                     value={orderForm.tailorId}
-                    onChange={(e) => setOrderForm({ ...orderForm, tailorId: e.target.value })}
+                    onChange={(e) => {
+                      setOrderForm({ 
+                        ...orderForm, 
+                        tailorId: e.target.value,
+                        garmentType: "",
+                        stitchingCharge: 0
+                      });
+                    }}
                     className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
                   >
                     <option value="">Choose tailor...</option>
@@ -672,23 +679,32 @@ export default function CustomerDashboard() {
                   <label className="block text-xs font-semibold text-ink/75">Garment Type</label>
                   <select
                     required
+                    disabled={!orderForm.tailorId}
                     value={orderForm.garmentType}
                     onChange={(e) => {
-                      const service = e.target.value;
-                      const serviceKey = service.toLowerCase().trim();
-                      const price = SERVICE_PRICES[serviceKey] || SERVICE_PRICES.default;
+                      const serviceName = e.target.value;
+                      const srv = availableServices.find(s => (s.name || s) === serviceName);
+                      const price = srv && typeof srv === "object" ? srv.price : (SERVICE_PRICES[serviceName.toLowerCase()] || 800);
                       setOrderForm({ 
                         ...orderForm, 
-                        garmentType: service,
+                        garmentType: serviceName,
                         stitchingCharge: price
                       });
                     }}
-                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch bg-white"
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch bg-white disabled:bg-black/[0.03] disabled:cursor-not-allowed"
                   >
-                    <option value="">Select garment...</option>
-                    {availableServices.map((srv) => (
-                      <option key={srv} value={srv}>{srv}</option>
-                    ))}
+                    <option value="">
+                      {orderForm.tailorId ? "Select garment..." : "Choose tailor first..."}
+                    </option>
+                    {availableServices.map((srv) => {
+                      const name = srv.name || srv;
+                      const price = srv.price;
+                      return (
+                        <option key={name} value={name}>
+                          {name} {price ? `(₹${price})` : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
