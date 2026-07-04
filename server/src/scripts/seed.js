@@ -20,7 +20,7 @@ await Promise.all([
   Notification.deleteMany({})
 ]);
 
-const passwordHash1 = await bcrypt.hash("password1", 12);
+const passwordHash1 = await bcrypt.hash("Rahim@2002", 12);
 const passwordHash2 = await bcrypt.hash("password12", 12);
 const passwordHash3 = await bcrypt.hash("password13", 12);
 
