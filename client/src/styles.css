@@ -47,3 +47,12 @@ textarea:focus {
   outline: 2px solid transparent !important;
   outline-offset: 2px !important;
 }
+
+/* Hide scrollbar utilities */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

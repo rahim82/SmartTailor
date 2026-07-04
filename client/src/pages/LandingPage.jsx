@@ -154,10 +154,10 @@ export default function LandingPage() {
           </form>
 
           {/* Service Filters */}
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex w-full items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x md:flex-wrap md:justify-center md:pb-0">
             <button
               onClick={() => setServiceFilter("")}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
+              className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
                 !serviceFilter 
                   ? "bg-stitch text-white border-stitch shadow-sm" 
                   : "bg-white text-ink/75 border-black/10 hover:bg-black/[0.02]"
@@ -169,7 +169,7 @@ export default function LandingPage() {
               <button
                 key={service}
                 onClick={() => setServiceFilter(service)}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
+                className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
                   serviceFilter === service 
                     ? "bg-stitch text-white border-stitch shadow-sm" 
                     : "bg-white text-ink/75 border-black/10 hover:bg-black/[0.02]"
