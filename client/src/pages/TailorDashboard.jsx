@@ -570,110 +570,112 @@ export default function TailorDashboard() {
           </div>
 
           <aside className="space-y-4">
-            {/* Order Actions */}
-            {selectedOrder ? (
-              <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
-                <div className="flex items-center justify-between border-b border-black/5 pb-3">
-                  <div>
-                    <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Manage Stitching</p>
-                    <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedOrder(null)} 
-                    className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <div className="mt-4 space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-ink/65">Garment:</span>
-                    <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-ink/65">Customer:</span>
-                    <span className="font-semibold text-ink">{selectedOrder.customerId?.name || "Walk-in"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-ink/65">Contact:</span>
-                    <span className="font-medium text-ink">{selectedOrder.customerId?.phone || "None"}</span>
-                  </div>
-
-                  {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
-                    <div className="mt-2.5">
-                      <p className="text-[11px] font-semibold text-ink/50 mb-1">Fabric / Design Photo:</p>
-                      <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
-                        <img 
-                          src={selectedOrder.designImages[0].url} 
-                          alt="Design Reference" 
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
+            {/* Order Actions - Desktop Only */}
+            <div className="hidden lg:block">
+              {selectedOrder ? (
+                <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
+                  <div className="flex items-center justify-between border-b border-black/5 pb-3">
+                    <div>
+                      <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Manage Stitching</p>
+                      <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
                     </div>
-                  )}
-
-                  <div className="flex justify-between border-t border-black/[0.04] pt-2">
-                    <span className="text-ink/65">Current Stage:</span>
-                    <span className="font-bold text-stitch uppercase text-xs">{selectedOrder.status}</span>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    <button
-                      onClick={() => {
-                        setStatusForm({ status: selectedOrder.status, note: "" });
-                        setIsStatusModalOpen(true);
-                      }}
-                      className="flex-1 rounded bg-stitch px-3 py-2 text-xs font-semibold text-white text-center hover:bg-stitch/90"
+                    <button 
+                      onClick={() => setSelectedOrder(null)} 
+                      className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
                     >
-                      Update Stage
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMeasurementForm({
-                          _id: "",
-                          customerId: selectedOrder.customerId?._id || selectedOrder.customerId || "",
-                          profileName: "Customer Profile",
-                          gender: "female",
-                          garmentType: selectedOrder.garmentType,
-                          chest: "",
-                          waist: "",
-                          hip: "",
-                          shoulder: "",
-                          sleeve: "",
-                          neck: "",
-                          inseam: "",
-                          length: "",
-                          armhole: "",
-                          blouseLength: "",
-                          salwarLength: "",
-                          notes: ""
-                        });
-                        setIsMeasurementModalOpen(true);
-                      }}
-                      className="flex-1 rounded border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-ink text-center hover:bg-black/[0.02]"
-                    >
-                      Record Measure
+                      <X size={16} />
                     </button>
                   </div>
 
-                  <div className="mt-2.5 border-t border-black/[0.04] pt-2.5">
-                    <button
-                      onClick={handleSendFreeWhatsApp}
-                      className="w-full rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 text-center hover:bg-emerald-100 transition flex items-center justify-center gap-1.5"
-                    >
-                      <MessageSquare size={13} className="text-emerald-600" /> Send Free WhatsApp Alert
-                    </button>
+                  <div className="mt-4 space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-ink/65">Garment:</span>
+                      <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-ink/65">Customer:</span>
+                      <span className="font-semibold text-ink">{selectedOrder.customerId?.name || "Walk-in"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-ink/65">Contact:</span>
+                      <span className="font-medium text-ink">{selectedOrder.customerId?.phone || "None"}</span>
+                    </div>
+
+                    {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
+                      <div className="mt-2.5">
+                        <p className="text-[11px] font-semibold text-ink/50 mb-1">Fabric / Design Photo:</p>
+                        <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
+                          <img 
+                            src={selectedOrder.designImages[0].url} 
+                            alt="Design Reference" 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between border-t border-black/[0.04] pt-2">
+                      <span className="text-ink/65">Current Stage:</span>
+                      <span className="font-bold text-stitch uppercase text-xs">{selectedOrder.status}</span>
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() => {
+                          setStatusForm({ status: selectedOrder.status, note: "" });
+                          setIsStatusModalOpen(true);
+                        }}
+                        className="flex-1 rounded bg-stitch px-3 py-2 text-xs font-semibold text-white text-center hover:bg-stitch/90"
+                      >
+                        Update Stage
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMeasurementForm({
+                            _id: "",
+                            customerId: selectedOrder.customerId?._id || selectedOrder.customerId || "",
+                            profileName: "Customer Profile",
+                            gender: "female",
+                            garmentType: selectedOrder.garmentType,
+                            chest: "",
+                            waist: "",
+                            hip: "",
+                            shoulder: "",
+                            sleeve: "",
+                            neck: "",
+                            inseam: "",
+                            length: "",
+                            armhole: "",
+                            blouseLength: "",
+                            salwarLength: "",
+                            notes: ""
+                          });
+                          setIsMeasurementModalOpen(true);
+                        }}
+                        className="flex-1 rounded border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-ink text-center hover:bg-black/[0.02]"
+                      >
+                        Record Measure
+                      </button>
+                    </div>
+
+                    <div className="mt-2.5 border-t border-black/[0.04] pt-2.5">
+                      <button
+                        onClick={handleSendFreeWhatsApp}
+                        className="w-full rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 text-center hover:bg-emerald-100 transition flex items-center justify-center gap-1.5"
+                      >
+                        <MessageSquare size={13} className="text-emerald-600" /> Send Free WhatsApp Alert
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-md border border-black/10 bg-white p-6 shadow-soft text-center py-10">
-                <Scissors className="mx-auto text-ink/30 mb-3" size={32} />
-                <h3 className="font-semibold text-ink text-sm">Select an order</h3>
-                <p className="text-xs text-ink/60 mt-1">Select any row from the work pipeline table to update its progress stage, add comments, or log measurement details.</p>
-              </div>
-            )}
+              ) : (
+                <div className="rounded-md border border-black/10 bg-white p-6 shadow-soft text-center py-10">
+                  <Scissors className="mx-auto text-ink/30 mb-3" size={32} />
+                  <h3 className="font-semibold text-ink text-sm">Select an order</h3>
+                  <p className="text-xs text-ink/60 mt-1">Select any row from the work pipeline table to update its progress stage, add comments, or log measurement details.</p>
+                </div>
+              )}
+            </div>
 
             {/* Delivery Calendar */}
             <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
@@ -1082,6 +1084,106 @@ export default function TailorDashboard() {
                 {measurementForm._id ? "Update Measurements" : "Save Measurements"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Selected Order Details - Mobile Modal Overlay */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm lg:hidden">
+          <div className="relative w-full max-w-md rounded-md bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-black/5 pb-3">
+              <div>
+                <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Manage Stitching</p>
+                <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedOrder(null)} 
+                className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-ink/65">Garment:</span>
+                <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ink/65">Customer:</span>
+                <span className="font-semibold text-ink">{selectedOrder.customerId?.name || "Walk-in"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ink/65">Contact:</span>
+                <span className="font-medium text-ink">{selectedOrder.customerId?.phone || "None"}</span>
+              </div>
+
+              {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
+                <div className="mt-2.5">
+                  <p className="text-[11px] font-semibold text-ink/50 mb-1">Fabric / Design Photo:</p>
+                  <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
+                    <img 
+                      src={selectedOrder.designImages[0].url} 
+                      alt="Design Reference" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-between border-t border-black/[0.04] pt-2">
+                <span className="text-ink/65">Current Stage:</span>
+                <span className="font-bold text-stitch uppercase text-xs">{selectedOrder.status}</span>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => {
+                    setStatusForm({ status: selectedOrder.status, note: "" });
+                    setIsStatusModalOpen(true);
+                  }}
+                  className="flex-1 rounded bg-stitch px-3 py-2 text-xs font-semibold text-white text-center hover:bg-stitch/90"
+                >
+                  Update Stage
+                </button>
+                <button
+                  onClick={() => {
+                    setMeasurementForm({
+                      _id: "",
+                      customerId: selectedOrder.customerId?._id || selectedOrder.customerId || "",
+                      profileName: "Customer Profile",
+                      gender: "female",
+                      garmentType: selectedOrder.garmentType,
+                      chest: "",
+                      waist: "",
+                      hip: "",
+                      shoulder: "",
+                      sleeve: "",
+                      neck: "",
+                      inseam: "",
+                      length: "",
+                      armhole: "",
+                      blouseLength: "",
+                      salwarLength: "",
+                      notes: ""
+                    });
+                    setIsMeasurementModalOpen(true);
+                  }}
+                  className="flex-1 rounded border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-ink text-center hover:bg-black/[0.02]"
+                >
+                  Record Measure
+                </button>
+              </div>
+
+              <div className="mt-2.5 border-t border-black/[0.04] pt-2.5">
+                <button
+                  onClick={handleSendFreeWhatsApp}
+                  className="w-full rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 text-center hover:bg-emerald-100 transition flex items-center justify-center gap-1.5"
+                >
+                  <MessageSquare size={13} className="text-emerald-600" /> Send Free WhatsApp Alert
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

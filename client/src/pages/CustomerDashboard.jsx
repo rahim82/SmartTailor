@@ -431,133 +431,135 @@ export default function CustomerDashboard() {
         </div>
 
         <aside className="space-y-4">
-          {/* Order Details & Timeline */}
-          {selectedOrder ? (
-            <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
-              <div className="flex items-center justify-between border-b border-black/5 pb-3">
-                <div>
-                  <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Selected Order</p>
-                  <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
-                </div>
-                <button 
-                  onClick={() => setSelectedOrder(null)} 
-                  className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-2.5 text-sm border-b border-black/5 pb-4">
-                <div className="flex justify-between">
-                  <span className="text-ink/60">Garment Type:</span>
-                  <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-ink/60">Tailor Shop:</span>
-                  <span className="font-semibold text-ink">{selectedOrder.tailorId?.shopName || "Unknown"}</span>
-                </div>
-                {selectedOrder.instructions && (
-                  <div className="rounded bg-linen/50 p-2.5 text-xs text-ink/80 mt-1 border border-black/[0.04]">
-                    <strong>Instructions:</strong> {selectedOrder.instructions}
+          {/* Order Details & Timeline - Desktop Only */}
+          <div className="hidden lg:block">
+            {selectedOrder ? (
+              <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
+                <div className="flex items-center justify-between border-b border-black/5 pb-3">
+                  <div>
+                    <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Selected Order</p>
+                    <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
                   </div>
-                )}
+                  <button 
+                    onClick={() => setSelectedOrder(null)} 
+                    className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
 
-                {/* Uploaded Image display */}
-                {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
-                  <div className="mt-2.5">
-                    <p className="text-xs font-semibold text-ink/50 mb-1">Fabric / Reference Photo:</p>
-                    <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
-                      <img 
-                        src={selectedOrder.designImages[0].url} 
-                        alt="Design Reference" 
-                        className="w-full h-full object-cover" 
-                      />
+                <div className="mt-4 space-y-2.5 text-sm border-b border-black/5 pb-4">
+                  <div className="flex justify-between">
+                    <span className="text-ink/60">Garment Type:</span>
+                    <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ink/60">Tailor Shop:</span>
+                    <span className="font-semibold text-ink">{selectedOrder.tailorId?.shopName || "Unknown"}</span>
+                  </div>
+                  {selectedOrder.instructions && (
+                    <div className="rounded bg-linen/50 p-2.5 text-xs text-ink/80 mt-1 border border-black/[0.04]">
+                      <strong>Instructions:</strong> {selectedOrder.instructions}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <div className="flex justify-between border-t border-black/[0.04] pt-2">
-                  <span className="text-ink/60">Payment Status:</span>
-                  <span className={`font-semibold capitalize ${selectedOrder.paymentStatus === "paid" ? "text-emerald-700" : "text-amber-700"}`}>
-                    {selectedOrder.paymentStatus}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-ink/60">Total Cost:</span>
-                  <span className="font-bold text-ink">₹{(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}</span>
-                </div>
-
-                {selectedOrder.paymentStatus !== "paid" && selectedOrder.status !== "cancelled" && (
-                  <button
-                    onClick={() => handlePayment(selectedOrder)}
-                    disabled={isPaying}
-                    className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-saffron px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-saffron/90 disabled:opacity-50"
-                  >
-                    <CreditCard size={14} /> {isPaying ? "Processing..." : `Pay ₹${(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}`}
-                  </button>
-                )}
-
-                {/* Rating Button - Available when order status is delivered */}
-                {selectedOrder.status === "delivered" && (
-                  <button
-                    onClick={() => {
-                      setReviewForm({
-                        orderId: selectedOrder._id,
-                        tailorId: selectedOrder.tailorId?._id || selectedOrder.tailorId,
-                        rating: 5,
-                        comment: ""
-                      });
-                      setIsReviewModalOpen(true);
-                    }}
-                    className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-stitch px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-stitch/90"
-                  >
-                    ★ Rate Tailor / Shop
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Upload size={16} className="text-stitch" />
-                  <h4 className="font-semibold text-sm">Stitching Timeline</h4>
-                </div>
-                <div className="relative border-l-2 border-black/10 pl-4 ml-2 space-y-4 py-1">
-                  {orderStages.map((stage, index) => {
-                    const currentStageIndex = getStageIndex(selectedOrder.status);
-                    const isCompleted = index <= currentStageIndex;
-                    const isCurrent = index === currentStageIndex;
-                    
-                    return (
-                      <div key={stage} className="relative">
-                        {/* Dot indicator */}
-                        <span 
-                          className={`absolute -left-[23px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white transition-colors duration-250 ${
-                            isCompleted ? "bg-stitch" : "bg-gray-300"
-                          } ${isCurrent ? "ring-2 ring-stitch/30 scale-110" : ""}`}
+                  {/* Uploaded Image display */}
+                  {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
+                    <div className="mt-2.5">
+                      <p className="text-xs font-semibold text-ink/50 mb-1">Fabric / Reference Photo:</p>
+                      <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
+                        <img 
+                          src={selectedOrder.designImages[0].url} 
+                          alt="Design Reference" 
+                          className="w-full h-full object-cover" 
                         />
-                        <div>
-                          <p className={`text-xs font-semibold uppercase tracking-wider ${isCompleted ? "text-ink font-semibold" : "text-ink/40"}`}>
-                            {stage}
-                          </p>
-                          {isCurrent && selectedOrder.statusHistory?.length > 0 && (
-                            <p className="text-[11px] text-ink/65 mt-0.5">
-                              {selectedOrder.statusHistory[selectedOrder.statusHistory.length - 1].note || "Status updated"}
-                            </p>
-                          )}
-                        </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
+
+                  <div className="flex justify-between border-t border-black/[0.04] pt-2">
+                    <span className="text-ink/60">Payment Status:</span>
+                    <span className={`font-semibold capitalize ${selectedOrder.paymentStatus === "paid" ? "text-emerald-700" : "text-amber-700"}`}>
+                      {selectedOrder.paymentStatus}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ink/60">Total Cost:</span>
+                    <span className="font-bold text-ink">₹{(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}</span>
+                  </div>
+
+                  {selectedOrder.paymentStatus !== "paid" && selectedOrder.status !== "cancelled" && (
+                    <button
+                      onClick={() => handlePayment(selectedOrder)}
+                      disabled={isPaying}
+                      className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-saffron px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-saffron/90 disabled:opacity-50"
+                    >
+                      <CreditCard size={14} /> {isPaying ? "Processing..." : `Pay ₹${(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}`}
+                    </button>
+                  )}
+
+                  {/* Rating Button - Available when order status is delivered */}
+                  {selectedOrder.status === "delivered" && (
+                    <button
+                      onClick={() => {
+                        setReviewForm({
+                          orderId: selectedOrder._id,
+                          tailorId: selectedOrder.tailorId?._id || selectedOrder.tailorId,
+                          rating: 5,
+                          comment: ""
+                        });
+                        setIsReviewModalOpen(true);
+                      }}
+                      className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-stitch px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-stitch/90"
+                    >
+                      ★ Rate Tailor / Shop
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Upload size={16} className="text-stitch" />
+                    <h4 className="font-semibold text-sm">Stitching Timeline</h4>
+                  </div>
+                  <div className="relative border-l-2 border-black/10 pl-4 ml-2 space-y-4 py-1">
+                    {orderStages.map((stage, index) => {
+                      const currentStageIndex = getStageIndex(selectedOrder.status);
+                      const isCompleted = index <= currentStageIndex;
+                      const isCurrent = index === currentStageIndex;
+                      
+                      return (
+                        <div key={stage} className="relative">
+                          {/* Dot indicator */}
+                          <span 
+                            className={`absolute -left-[23px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white transition-colors duration-250 ${
+                              isCompleted ? "bg-stitch" : "bg-gray-300"
+                            } ${isCurrent ? "ring-2 ring-stitch/30 scale-110" : ""}`}
+                          />
+                          <div>
+                            <p className={`text-xs font-semibold uppercase tracking-wider ${isCompleted ? "text-ink font-semibold" : "text-ink/40"}`}>
+                              {stage}
+                            </p>
+                            {isCurrent && selectedOrder.statusHistory?.length > 0 && (
+                              <p className="text-[11px] text-ink/65 mt-0.5">
+                                {selectedOrder.statusHistory[selectedOrder.statusHistory.length - 1].note || "Status updated"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="rounded-md border border-black/10 bg-white p-6 shadow-soft text-center py-10">
-              <Scissors className="mx-auto text-ink/30 mb-3" size={32} />
-              <h3 className="font-semibold text-ink text-sm">Select an order</h3>
-              <p className="text-xs text-ink/60 mt-1">Click on any order in the table to view the real-time timeline, custom details, and payments.</p>
-            </div>
-          )}
+            ) : (
+              <div className="rounded-md border border-black/10 bg-white p-6 shadow-soft text-center py-10">
+                <Scissors className="mx-auto text-ink/30 mb-3" size={32} />
+                <h3 className="font-semibold text-ink text-sm">Select an order</h3>
+                <p className="text-xs text-ink/60 mt-1">Click on any order in the table to view the real-time timeline, custom details, and payments.</p>
+              </div>
+            )}
+          </div>
 
           {/* Measurements List */}
           <div className="rounded-md border border-black/10 bg-white p-5 shadow-soft">
@@ -897,6 +899,129 @@ export default function CustomerDashboard() {
                 Submit Review
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Selected Order Details - Mobile Modal Overlay */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm lg:hidden">
+          <div className="relative w-full max-w-md rounded-md bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-black/5 pb-3">
+              <div>
+                <p className="text-xs font-semibold text-stitch uppercase tracking-wide">Selected Order</p>
+                <h3 className="text-lg font-bold text-ink">{selectedOrder.orderNo}</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedOrder(null)} 
+                className="rounded p-1 hover:bg-black/5 text-ink/40 hover:text-ink"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-2.5 text-sm border-b border-black/5 pb-4">
+              <div className="flex justify-between">
+                <span className="text-ink/60">Garment Type:</span>
+                <span className="font-semibold text-ink">{selectedOrder.garmentType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ink/60">Tailor Shop:</span>
+                <span className="font-semibold text-ink">{selectedOrder.tailorId?.shopName || "Unknown"}</span>
+              </div>
+              {selectedOrder.instructions && (
+                <div className="rounded bg-linen/50 p-2.5 text-xs text-ink/80 mt-1 border border-black/[0.04]">
+                  <strong>Instructions:</strong> {selectedOrder.instructions}
+                </div>
+              )}
+
+              {/* Uploaded Image display */}
+              {selectedOrder.designImages && selectedOrder.designImages.length > 0 && (
+                <div className="mt-2.5">
+                  <p className="text-xs font-semibold text-ink/50 mb-1">Fabric / Reference Photo:</p>
+                  <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
+                    <img 
+                      src={selectedOrder.designImages[0].url} 
+                      alt="Design Reference" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-between border-t border-black/[0.04] pt-2">
+                <span className="text-ink/60">Payment Status:</span>
+                <span className={`font-semibold capitalize ${selectedOrder.paymentStatus === "paid" ? "text-emerald-700" : "text-amber-700"}`}>
+                  {selectedOrder.paymentStatus}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ink/60">Total Cost:</span>
+                <span className="font-bold text-ink">₹{(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}</span>
+              </div>
+
+              {selectedOrder.paymentStatus !== "paid" && selectedOrder.status !== "cancelled" && (
+                <button
+                  onClick={() => handlePayment(selectedOrder)}
+                  disabled={isPaying}
+                  className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-saffron px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-saffron/90 disabled:opacity-50"
+                >
+                  <CreditCard size={14} /> {isPaying ? "Processing..." : `Pay ₹${(selectedOrder.pricing?.total || 0).toLocaleString("en-IN")}`}
+                </button>
+              )}
+
+              {/* Rating Button - Available when order status is delivered */}
+              {selectedOrder.status === "delivered" && (
+                <button
+                  onClick={() => {
+                    setReviewForm({
+                      orderId: selectedOrder._id,
+                      tailorId: selectedOrder.tailorId?._id || selectedOrder.tailorId,
+                      rating: 5,
+                      comment: ""
+                    });
+                    setIsReviewModalOpen(true);
+                  }}
+                  className="w-full mt-3 flex items-center justify-center gap-2 rounded bg-stitch px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-stitch/90"
+                >
+                  ★ Rate Tailor / Shop
+                </button>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Upload size={16} className="text-stitch" />
+                <h4 className="font-semibold text-sm">Stitching Timeline</h4>
+              </div>
+              <div className="relative border-l-2 border-black/10 pl-4 ml-2 space-y-4 py-1">
+                {orderStages.map((stage, index) => {
+                  const currentStageIndex = getStageIndex(selectedOrder.status);
+                  const isCompleted = index <= currentStageIndex;
+                  const isCurrent = index === currentStageIndex;
+                  
+                  return (
+                    <div key={stage} className="relative">
+                      {/* Dot indicator */}
+                      <span 
+                        className={`absolute -left-[23px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white transition-colors duration-250 ${
+                          isCompleted ? "bg-stitch" : "bg-gray-300"
+                        } ${isCurrent ? "ring-2 ring-stitch/30 scale-110" : ""}`}
+                      />
+                      <div>
+                        <p className={`text-xs font-semibold uppercase tracking-wider ${isCompleted ? "text-ink font-semibold" : "text-ink/40"}`}>
+                          {stage}
+                        </p>
+                        {isCurrent && selectedOrder.statusHistory?.length > 0 && (
+                          <p className="text-[11px] text-ink/65 mt-0.5">
+                            {selectedOrder.statusHistory[selectedOrder.statusHistory.length - 1].note || "Status updated"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       )}
