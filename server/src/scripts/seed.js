@@ -20,12 +20,14 @@ await Promise.all([
   Notification.deleteMany({})
 ]);
 
-const passwordHash = await bcrypt.hash("password123", 12);
+const passwordHash1 = await bcrypt.hash("password1", 12);
+const passwordHash2 = await bcrypt.hash("password12", 12);
+const passwordHash3 = await bcrypt.hash("password13", 12);
 
 const [admin, customer, tailorUser] = await User.create([
-  { name: "Admin", phone: "9999999999", email: "admin@smarttailor.test", passwordHash, role: "admin" },
-  { name: "Priya Sharma", phone: "8888888888", email: "customer@smarttailor.test", passwordHash, role: "customer" },
-  { name: "Meena Tailor", phone: "7777777777", email: "tailor@smarttailor.test", passwordHash, role: "tailor" }
+  { name: "Admin", phone: "6204466305", email: "smarttailor275@gmail.com", passwordHash: passwordHash1, role: "admin" },
+  { name: "Priya Sharma", phone: "8888888888", email: "customer@smarttailor.test", passwordHash: passwordHash2, role: "customer" },
+  { name: "Meena Tailor", phone: "7777777777", email: "tailor@smarttailor.test", passwordHash: passwordHash3, role: "tailor" }
 ]);
 
 const tailor = await Tailor.create({
@@ -95,7 +97,7 @@ await Notification.create({
 });
 
 console.log("Seed complete");
-console.log("Admin: admin@smarttailor.test / password123");
-console.log("Customer: customer@smarttailor.test / password123");
-console.log("Tailor: tailor@smarttailor.test / password123");
+console.log(`Admin: ${admin.email} / password1`);
+console.log(`Customer: ${customer.email} / password12`);
+console.log(`Tailor: ${tailorUser.email} / password13`);
 process.exit(0);
