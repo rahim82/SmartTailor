@@ -7,6 +7,18 @@ import OrderTable from "../components/OrderTable.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
+const SERVICE_PRICES = {
+  kurta: 600,
+  blouse: 500,
+  lehenga: 1800,
+  alteration: 150,
+  suit: 900,
+  shirt: 400,
+  pants: 500,
+  sherwani: 2500,
+  default: 800
+};
+
 export default function CustomerDashboard() {
   const { user } = useAuth();
   const location = useLocation();
@@ -32,7 +44,7 @@ export default function CustomerDashboard() {
     garmentType: "",
     instructions: "",
     fabricProvidedBy: "customer",
-    stitchingCharge: 800,
+    stitchingCharge: 0,
     fabricCharge: 0,
     discount: 0,
     dueDate: ""
@@ -363,6 +375,11 @@ export default function CustomerDashboard() {
     );
   }
 
+  const selectedTailorObj = tailors.find(t => t._id === orderForm.tailorId);
+  const availableServices = selectedTailorObj?.services && selectedTailorObj.services.length > 0
+    ? selectedTailorObj.services
+    : ["Kurta", "Blouse", "Lehenga", "Suit", "Alteration"];
+
   return (
     <PageShell
       eyebrow="Customer Dashboard"
@@ -653,14 +670,26 @@ export default function CustomerDashboard() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-ink/75">Garment Type</label>
-                  <input
-                    type="text"
+                  <select
                     required
-                    placeholder="e.g. Silk Blouse, Kurta"
                     value={orderForm.garmentType}
-                    onChange={(e) => setOrderForm({ ...orderForm, garmentType: e.target.value })}
-                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
-                  />
+                    onChange={(e) => {
+                      const service = e.target.value;
+                      const serviceKey = service.toLowerCase().trim();
+                      const price = SERVICE_PRICES[serviceKey] || SERVICE_PRICES.default;
+                      setOrderForm({ 
+                        ...orderForm, 
+                        garmentType: service,
+                        stitchingCharge: price
+                      });
+                    }}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch bg-white"
+                  >
+                    <option value="">Select garment...</option>
+                    {availableServices.map((srv) => (
+                      <option key={srv} value={srv}>{srv}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -711,9 +740,9 @@ export default function CustomerDashboard() {
                   <label className="block text-xs font-semibold text-ink/75">Est. Stitch Charge (₹)</label>
                   <input
                     type="number"
+                    disabled
                     value={orderForm.stitchingCharge}
-                    onChange={(e) => setOrderForm({ ...orderForm, stitchingCharge: e.target.value })}
-                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                    className="mt-1 w-full rounded border border-black/15 bg-black/[0.03] px-3 py-2 text-sm text-ink/65 outline-none cursor-not-allowed font-semibold"
                   />
                 </div>
 
