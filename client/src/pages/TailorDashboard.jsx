@@ -31,11 +31,15 @@ export default function TailorDashboard() {
   const [isMeasurementModalOpen, setIsMeasurementModalOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Forms data
   const [profileForm, setProfileForm] = useState({
     shopName: "",
     description: "",
-    services: "Blouse, Kurta, Lehenga, Alteration",
+    services: [
+      { name: "Blouse", price: 500 },
+      { name: "Kurta", price: 600 },
+      { name: "Alteration", price: 150 },
+      { name: "Lehenga", price: 1800 }
+    ],
     address: "",
     city: "",
     state: "",
@@ -90,7 +94,9 @@ export default function TailorDashboard() {
         setProfileForm({
           shopName: res.data.tailor.shopName || "",
           description: res.data.tailor.description || "",
-          services: res.data.tailor.services?.join(", ") || "",
+          services: res.data.tailor.services && res.data.tailor.services.length > 0
+            ? res.data.tailor.services
+            : [],
           address: res.data.tailor.location?.address || "",
           city: res.data.tailor.location?.city || "",
           state: res.data.tailor.location?.state || "",
@@ -151,10 +157,7 @@ export default function TailorDashboard() {
   async function handleProfileSubmit(e) {
     e.preventDefault();
     try {
-      const servicesArray = profileForm.services
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const servicesArray = (profileForm.services || []).filter((s) => s.name && s.name.trim());
 
       const payload = {
         shopName: profileForm.shopName,
@@ -389,14 +392,59 @@ export default function TailorDashboard() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink/75">Services (comma separated)</label>
-              <input
-                type="text"
-                placeholder="Blouse, Kurta, Lehenga, Alteration"
-                value={profileForm.services}
-                onChange={(e) => setProfileForm({ ...profileForm, services: e.target.value })}
-                className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
-              />
+              <label className="block text-xs font-semibold text-ink/75 mb-2">Services & Pricing</label>
+              <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                {(profileForm.services || []).map((item, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      placeholder="e.g. Kurta"
+                      value={item.name}
+                      onChange={(e) => {
+                        const updated = [...profileForm.services];
+                        updated[idx].name = e.target.value;
+                        setProfileForm({ ...profileForm, services: updated });
+                      }}
+                      className="flex-1 rounded border border-black/15 px-3 py-1.5 text-xs outline-none focus:border-stitch"
+                      required
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={item.price || ""}
+                      onChange={(e) => {
+                        const updated = [...profileForm.services];
+                        updated[idx].price = parseFloat(e.target.value) || 0;
+                        setProfileForm({ ...profileForm, services: updated });
+                      }}
+                      className="w-20 rounded border border-black/15 px-3 py-1.5 text-xs outline-none focus:border-stitch"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = profileForm.services.filter((_, i) => i !== idx);
+                        setProfileForm({ ...profileForm, services: updated });
+                      }}
+                      className="text-red-500 hover:text-red-700 p-1 text-xs"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileForm({
+                    ...profileForm,
+                    services: [...(profileForm.services || []), { name: "", price: 0 }]
+                  });
+                }}
+                className="mt-2 text-xs font-semibold text-stitch hover:underline flex items-center gap-1"
+              >
+                + Add Service Rate
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -864,13 +912,59 @@ export default function TailorDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ink/75">Services (comma separated)</label>
-                <input
-                  type="text"
-                  value={profileForm.services}
-                  onChange={(e) => setProfileForm({ ...profileForm, services: e.target.value })}
-                  className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
-                />
+                <label className="block text-xs font-semibold text-ink/75 mb-2">Services & Pricing</label>
+                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                  {(profileForm.services || []).map((item, idx) => (
+                    <div key={idx} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        placeholder="e.g. Kurta"
+                        value={item.name}
+                        onChange={(e) => {
+                          const updated = [...profileForm.services];
+                          updated[idx].name = e.target.value;
+                          setProfileForm({ ...profileForm, services: updated });
+                        }}
+                        className="flex-1 rounded border border-black/15 px-3 py-1.5 text-xs outline-none focus:border-stitch"
+                        required
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={item.price || ""}
+                        onChange={(e) => {
+                          const updated = [...profileForm.services];
+                          updated[idx].price = parseFloat(e.target.value) || 0;
+                          setProfileForm({ ...profileForm, services: updated });
+                        }}
+                        className="w-20 rounded border border-black/15 px-3 py-1.5 text-xs outline-none focus:border-stitch"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = profileForm.services.filter((_, i) => i !== idx);
+                          setProfileForm({ ...profileForm, services: updated });
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1 text-xs"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileForm({
+                      ...profileForm,
+                      services: [...(profileForm.services || []), { name: "", price: 0 }]
+                    });
+                  }}
+                  className="mt-2 text-xs font-semibold text-stitch hover:underline flex items-center gap-1"
+                >
+                  + Add Service Rate
+                </button>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

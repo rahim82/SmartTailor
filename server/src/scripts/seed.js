@@ -32,7 +32,12 @@ const tailor = await Tailor.create({
   userId: tailorUser._id,
   shopName: "Meena Boutique",
   description: "Specialist in blouses, kurtas, lehenga fitting, and alterations.",
-  services: ["Blouse", "Kurta", "Alteration", "Lehenga"],
+  services: [
+    { name: "Blouse", price: 500 },
+    { name: "Kurta", price: 600 },
+    { name: "Alteration", price: 150 },
+    { name: "Lehenga", price: 1800 }
+  ],
   location: { address: "MI Road", city: "Jaipur", state: "Rajasthan", pincode: "302001" },
   workingHours: "10 AM - 8 PM",
   ratingAvg: 4.7,

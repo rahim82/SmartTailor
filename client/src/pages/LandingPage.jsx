@@ -239,8 +239,8 @@ export default function LandingPage() {
                         <p className="text-[9px] uppercase font-extrabold tracking-wider text-ink/40 mb-2">Stitching Specialties</p>
                         <div className="flex flex-wrap gap-1">
                           {tailor.services?.map((serv) => (
-                            <span key={serv} className="rounded bg-black/[0.04] px-2.5 py-0.5 text-[10px] font-semibold text-ink/70">
-                              {serv}
+                            <span key={serv.name || serv} className="rounded bg-black/[0.04] px-2.5 py-0.5 text-[10px] font-semibold text-ink/70">
+                              {serv.name || serv}
                             </span>
                           ))}
                         </div>
