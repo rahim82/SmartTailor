@@ -2,17 +2,17 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
-import { 
-  ArrowRight, 
-  CalendarDays, 
-  CreditCard, 
-  Ruler, 
-  Search, 
-  ShieldCheck, 
-  Workflow, 
-  Star, 
-  MapPin, 
-  Scissors, 
+import {
+  ArrowRight,
+  CalendarDays,
+  CreditCard,
+  Ruler,
+  Search,
+  ShieldCheck,
+  Workflow,
+  Star,
+  MapPin,
+  Scissors,
   Store,
   Clock,
   Sparkles
@@ -65,17 +65,17 @@ export default function LandingPage() {
 
   function handleBooking(tailor) {
     if (!user) {
-      navigate("/auth", { 
-        state: { 
-          from: "/customer", 
-          selectedTailorId: tailor._id 
-        } 
+      navigate("/auth", {
+        state: {
+          from: "/customer",
+          selectedTailorId: tailor._id
+        }
       });
     } else if (user.role === "customer") {
-      navigate("/customer", { 
-        state: { 
-          selectedTailorId: tailor._id 
-        } 
+      navigate("/customer", {
+        state: {
+          selectedTailorId: tailor._id
+        }
       });
     } else {
       alert(`You are logged in as a ${user.role}. Only customer accounts can book tailor orders.`);
@@ -83,13 +83,13 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-linen overflow-hidden">
+    <main className="relative min-h-screen bg-transparent overflow-hidden">
       {/* Sleek Gradient Blobs & SVGs for Premium Vibe */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-saffron/25 blur-[120px]" />
-        <div className="absolute top-[25%] -right-[15%] w-[800px] h-[800px] rounded-full bg-stitch/25 blur-[150px]" />
-        <div className="absolute -bottom-[10%] left-[15%] w-[500px] h-[500px] rounded-full bg-saffron/20 blur-[100px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-saffron/15 blur-[120px] animate-float-1" />
+        <div className="absolute top-[20%] -right-[15%] w-[800px] h-[800px] rounded-full bg-stitch/15 blur-[150px] animate-float-2" />
+        <div className="absolute -bottom-[10%] left-[15%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[100px] animate-float-1" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a05_1px,transparent_1px),linear-gradient(to_bottom,#0f172a05_1px,transparent_1px)] bg-[size:32px_32px]" />
       </div>
 
       {/* Floating Outline Tailoring Elements */}
@@ -157,11 +157,10 @@ export default function LandingPage() {
           <div className="flex w-full items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x md:flex-wrap md:justify-center md:pb-0">
             <button
               onClick={() => setServiceFilter("")}
-              className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
-                !serviceFilter 
-                  ? "bg-stitch text-white border-stitch shadow-sm" 
+              className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${!serviceFilter
+                  ? "bg-stitch text-white border-stitch shadow-sm"
                   : "bg-white text-ink/75 border-black/10 hover:bg-black/[0.02]"
-              }`}
+                }`}
             >
               All Services
             </button>
@@ -169,11 +168,10 @@ export default function LandingPage() {
               <button
                 key={service}
                 onClick={() => setServiceFilter(service)}
-                className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
-                  serviceFilter === service 
-                    ? "bg-stitch text-white border-stitch shadow-sm" 
+                className={`flex-shrink-0 snap-center rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${serviceFilter === service
+                    ? "bg-stitch text-white border-stitch shadow-sm"
                     : "bg-white text-ink/75 border-black/10 hover:bg-black/[0.02]"
-                }`}
+                  }`}
               >
                 {service}
               </button>
@@ -198,12 +196,12 @@ export default function LandingPage() {
         ) : (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {tailors.map((tailor, index) => {
-              const imageSrc = (tailor.portfolioImages && tailor.portfolioImages.length > 0 && tailor.portfolioImages[0].url) 
-                ? tailor.portfolioImages[0].url 
+              const imageSrc = (tailor.portfolioImages && tailor.portfolioImages.length > 0 && tailor.portfolioImages[0].url)
+                ? tailor.portfolioImages[0].url
                 : tailorImages[index % tailorImages.length];
               return (
-                <div 
-                  key={tailor._id} 
+                <div
+                  key={tailor._id}
                   className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-black/10 bg-white/80 backdrop-blur-md shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-stitch/30 hover:shadow-soft"
                 >
                   <div>

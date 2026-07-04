@@ -6,8 +6,7 @@ import { dashboardPath } from "../lib/routes.js";
 
 const demoAccounts = [
   { label: "Customer", email: "customer@smarttailor.test", password: "password123" },
-  { label: "Tailor", email: "tailor@smarttailor.test", password: "password123" },
-  { label: "Admin", email: "smarttailor275@gmail.com", password: "Rahim@2002" }
+  { label: "Tailor", email: "tailor@smarttailor.test", password: "password123" }
 ];
 
 export default function AuthPage() {
@@ -58,7 +57,7 @@ export default function AuthPage() {
           Login with seeded users or register a customer/tailor. JWT token is stored locally and every dashboard uses live API calls.
         </p>
         <div className="mt-6 rounded-md border border-black/10 bg-white p-4 text-sm shadow-soft">
-          <p className="font-semibold">Seed login</p>
+          <p className="font-semibold">Demo login</p>
           <div className="mt-3 space-y-2">
             {demoAccounts.map(({ label, email, password }) => (
               <button

@@ -15,7 +15,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/5 bg-linen/85 backdrop-blur-md shadow-sm">
+    <header className="sticky top-0 z-20 border-b border-black/5 bg-white/75 backdrop-blur-md shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2.5 font-bold text-lg tracking-tight">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-stitch text-white shadow-sm hover:scale-105 transition-transform duration-200">
