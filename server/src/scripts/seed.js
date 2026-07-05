@@ -20,14 +20,17 @@ await Promise.all([
   Notification.deleteMany({})
 ]);
 
-const passwordHash1 = await bcrypt.hash("Rahim@2002", 12);
-const passwordHash2 = await bcrypt.hash("password123", 12);
-const passwordHash3 = await bcrypt.hash("password123", 12);
+const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@smarttailor.test";
+const adminPassword = process.env.SEED_ADMIN_PASSWORD || "password123";
+
+const passwordHash1 = await bcrypt.hash(adminPassword, 12);
+const passwordHash2 = await bcrypt.hash(process.env.SEED_CUSTOMER_PASSWORD || "password123", 12);
+const passwordHash3 = await bcrypt.hash(process.env.SEED_TAILOR_PASSWORD || "password123", 12);
 
 const [admin, customer, tailorUser] = await User.create([
-  { name: "Admin", phone: "6204466305", email: "smarttailor275@gmail.com", passwordHash: passwordHash1, role: "admin" },
-  { name: "Priya Sharma", phone: "8888888888", email: "customer@smarttailor.test", passwordHash: passwordHash2, role: "customer" },
-  { name: "Meena Tailor", phone: "7777777777", email: "tailor@smarttailor.test", passwordHash: passwordHash3, role: "tailor" }
+  { name: "Admin", phone: "6204466305", email: adminEmail, passwordHash: passwordHash1, role: "admin" },
+  { name: "Priya Sharma", phone: "8888888888", email: process.env.SEED_CUSTOMER_EMAIL || "customer@smarttailor.test", passwordHash: passwordHash2, role: "customer" },
+  { name: "Meena Tailor", phone: "7777777777", email: process.env.SEED_TAILOR_EMAIL || "tailor@smarttailor.test", passwordHash: passwordHash3, role: "tailor" }
 ]);
 
 const tailor = await Tailor.create({
@@ -97,7 +100,7 @@ await Notification.create({
 });
 
 console.log("Seed complete");
-console.log(`Admin: ${admin.email} / password1`);
-console.log(`Customer: ${customer.email} / password12`);
-console.log(`Tailor: ${tailorUser.email} / password13`);
+console.log(`Admin: ${admin.email} / ${process.env.SEED_ADMIN_PASSWORD ? "******** (configured in env)" : "password123 (default)"}`);
+console.log(`Customer: ${customer.email} / ${process.env.SEED_CUSTOMER_PASSWORD ? "********" : "password123"}`);
+console.log(`Tailor: ${tailorUser.email} / ${process.env.SEED_TAILOR_PASSWORD ? "********" : "password123"}`);
 process.exit(0);
