@@ -103,6 +103,5 @@ Use these seeded accounts to test different roles:
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Admin** | `smarttailor275@gmail.com` | `Rahim@2002` |
 | **Customer** | `customer@smarttailor.test` | `password123` |
 | **Tailor** | `tailor@smarttailor.test` | `password123` |
