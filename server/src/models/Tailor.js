@@ -6,7 +6,7 @@ const tailorSchema = new mongoose.Schema(
     shopName: { type: String, required: true, trim: true },
     description: String,
     services: [{
-      name: { type: String, required: true },
+      name: { type: String, required: true, index: true },
       price: { type: Number, required: true }
     }],
     location: {

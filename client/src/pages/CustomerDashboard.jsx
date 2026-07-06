@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard.jsx";
 import OrderTable from "../components/OrderTable.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
 
 const SERVICE_PRICES = {
   kurta: 600,
@@ -135,11 +136,12 @@ export default function CustomerDashboard() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file);
-
     setUploading(true);
     try {
+      const compressedFile = await compressImage(file);
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+
       const { data } = await api.post("/uploads/images", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -486,7 +488,7 @@ export default function CustomerDashboard() {
                       <p className="text-xs font-semibold text-ink/50 mb-1">Fabric / Reference Photo:</p>
                       <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
                         <img 
-                          src={selectedOrder.designImages[0].url} 
+                          src={getOptimizedImageUrl(selectedOrder.designImages[0].url, 400)} 
                           alt="Design Reference" 
                           className="w-full h-full object-cover" 
                         />
@@ -985,7 +987,7 @@ export default function CustomerDashboard() {
                   <p className="text-xs font-semibold text-ink/50 mb-1">Fabric / Reference Photo:</p>
                   <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
                     <img 
-                      src={selectedOrder.designImages[0].url} 
+                      src={getOptimizedImageUrl(selectedOrder.designImages[0].url, 400)} 
                       alt="Design Reference" 
                       className="w-full h-full object-cover" 
                     />

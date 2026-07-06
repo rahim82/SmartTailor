@@ -5,6 +5,7 @@ import StatCard from "../components/StatCard.jsx";
 import OrderTable from "../components/OrderTable.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
 
 export default function TailorDashboard() {
   const { user } = useAuth();
@@ -133,11 +134,12 @@ export default function TailorDashboard() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file);
-
     setUploadingImage(true);
     try {
+      const compressedFile = await compressImage(file);
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+
       const { data } = await api.post("/uploads/images", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -653,11 +655,11 @@ export default function TailorDashboard() {
                       <div className="mt-2.5">
                         <p className="text-[11px] font-semibold text-ink/50 mb-1">Fabric / Design Photo:</p>
                         <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
-                          <img 
-                            src={selectedOrder.designImages[0].url} 
-                            alt="Design Reference" 
-                            className="w-full h-full object-cover" 
-                          />
+                           <img 
+                             src={getOptimizedImageUrl(selectedOrder.designImages[0].url, 400)} 
+                             alt="Design Reference" 
+                             className="w-full h-full object-cover" 
+                           />
                         </div>
                       </div>
                     )}
@@ -1183,7 +1185,7 @@ export default function TailorDashboard() {
       )}
       {/* Selected Order Details - Mobile Modal Overlay */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm lg:hidden">
+        <div className="fixed inset-1 z-20 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm lg:hidden">
           <div className="relative w-full max-w-md rounded-md bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-black/5 pb-3">
               <div>
@@ -1216,11 +1218,11 @@ export default function TailorDashboard() {
                 <div className="mt-2.5">
                   <p className="text-[11px] font-semibold text-ink/50 mb-1">Fabric / Design Photo:</p>
                   <div className="rounded-lg overflow-hidden border border-black/10 max-h-[140px] bg-black/5">
-                    <img 
-                      src={selectedOrder.designImages[0].url} 
-                      alt="Design Reference" 
-                      className="w-full h-full object-cover" 
-                    />
+                     <img 
+                       src={getOptimizedImageUrl(selectedOrder.designImages[0].url, 400)} 
+                       alt="Design Reference" 
+                       className="w-full h-full object-cover" 
+                     />
                   </div>
                 </div>
               )}

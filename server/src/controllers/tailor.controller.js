@@ -9,7 +9,10 @@ export async function listTailors(req, res, next) {
     if (city) filter["location.city"] = new RegExp(city, "i");
     if (service) filter["services.name"] = service;
 
-    const tailors = await Tailor.find(filter).populate("userId", "name phone avatarUrl").sort({ ratingAvg: -1 });
+    const tailors = await Tailor.find(filter)
+      .select("shopName description services location ratingAvg totalReviews portfolioImages userId")
+      .populate("userId", "name phone avatarUrl")
+      .sort({ ratingAvg: -1 });
     res.json({ tailors });
   } catch (error) {
     next(error);

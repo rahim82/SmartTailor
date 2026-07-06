@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
+import { getOptimizedImageUrl } from "../lib/imageCompress.js";
 import {
   ArrowRight,
   CalendarDays,
@@ -208,7 +209,7 @@ export default function LandingPage() {
                     {/* Tailor Shop Image Section */}
                     <div className="relative h-48 w-full overflow-hidden bg-black/5 border-b border-black/5">
                       <img
-                        src={imageSrc}
+                        src={getOptimizedImageUrl(imageSrc, 600)}
                         alt={tailor.shopName}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
