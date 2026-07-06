@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Scissors } from "lucide-react";
+import { Scissors, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { dashboardPath } from "../lib/routes.js";
 
@@ -16,6 +16,7 @@ export default function AuthPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "password123", identifier: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,9 +54,7 @@ export default function AuthPage() {
           <Scissors />
         </div>
         <h1 className="mt-5 text-4xl font-semibold">Connect SmartTailor to real accounts</h1>
-        <p className="mt-4 max-w-xl leading-7 text-ink/70">
-          Login with seeded users or register a customer/tailor. JWT token is stored locally and every dashboard uses live API calls.
-        </p>
+        
         <div className="mt-6 rounded-md border border-black/10 bg-white p-4 text-sm shadow-soft">
           <p className="font-semibold">Demo login</p>
           <div className="mt-3 space-y-2">
@@ -111,7 +110,25 @@ export default function AuthPage() {
           {mode === "login" && (
             <Input label="Email or phone" value={form.identifier} onChange={(value) => update("identifier", value)} required />
           )}
-          <Input label="Password" type="password" value={form.password} onChange={(value) => update("password", value)} required />
+          <div className="relative">
+            <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Password</label>
+            <div className="relative mt-1.5">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                required
+                onChange={(event) => update("password", event.target.value)}
+                className="w-full rounded-lg border border-black/15 bg-black/[0.01] pl-4.5 pr-12 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-ink/40 hover:text-ink focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
           {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
           <button 
             disabled={busy} 
