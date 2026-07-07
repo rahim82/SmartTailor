@@ -17,6 +17,9 @@ export async function createOrder(req, res, next) {
       statusHistory: [{ status: "placed", note: "Order placed", changedBy: req.user._id }]
     });
 
+    const io = req.app.get("io");
+    if (io) io.emit("admin:refresh");
+
     const tailor = await Tailor.findById(order.tailorId);
     if (tailor) {
       const notification = await Notification.create({

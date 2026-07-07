@@ -16,6 +16,9 @@ export async function register(req, res, next) {
     const user = await User.create({ name, phone, email, passwordHash, role });
     const token = signAccessToken(user);
 
+    const io = req.app.get("io");
+    if (io) io.emit("admin:refresh");
+
     res.status(201).json({
       token,
       user: { id: user._id, name: user.name, phone: user.phone, email: user.email, role: user.role }
@@ -28,7 +31,12 @@ export async function register(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { identifier, password } = req.body;
-    const user = await User.findOne({ $or: [{ phone: identifier }, { email: identifier }] });
+    const cleanIdentifier = typeof identifier === "string" ? identifier.trim() : identifier;
+    const emailIdentifier = typeof cleanIdentifier === "string" ? cleanIdentifier.toLowerCase() : cleanIdentifier;
+
+    const user = await User.findOne({ 
+      $or: [{ phone: cleanIdentifier }, { email: emailIdentifier }] 
+    });
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return res.status(401).json({ message: "Invalid credentials" });

@@ -6,7 +6,8 @@ import {
   listTailorsAdmin,
   listUsers,
   updateUserStatus,
-  verifyTailor
+  verifyTailor,
+  deleteTailor
 } from "../controllers/admin.controller.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
 
@@ -18,6 +19,7 @@ router.get("/users", listUsers);
 router.patch("/users/:id/status", updateUserStatus);
 router.get("/tailors", listTailorsAdmin);
 router.patch("/tailors/:id/verify", verifyTailor);
+router.delete("/tailors/:id", deleteTailor);
 router.get("/orders", listOrdersAdmin);
 router.get("/payments", listPaymentsAdmin);
 

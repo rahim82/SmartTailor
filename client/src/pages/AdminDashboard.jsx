@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { ShieldCheck, UserCheck, Scissors, TrendingUp, RefreshCw, Check, X } from "lucide-react";
+import { ShieldCheck, UserCheck, Scissors, TrendingUp, RefreshCw, Check, X, Trash2 } from "lucide-react";
 import PageShell from "../components/PageShell.jsx";
 import StatCard from "../components/StatCard.jsx";
 import { api } from "../lib/api.js";
+import { socket } from "../lib/socket.js";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ users: 0, tailors: 0, orders: 0, gmv: 0 });
@@ -30,6 +31,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadAdminData();
+
+    socket.connect();
+    socket.on("admin:refresh", loadAdminData);
+
+    return () => {
+      socket.off("admin:refresh", loadAdminData);
+      socket.disconnect();
+    };
   }, []);
 
   async function handleVerify(tailorId, status) {
@@ -39,6 +48,19 @@ export default function AdminDashboard() {
       loadAdminData(); // Refresh list and stats
     } catch (err) {
       alert(err.response?.data?.message || "Failed to update verification status");
+    }
+  }
+
+  async function handleDelete(tailorId) {
+    if (!window.confirm("Are you sure you want to permanently delete this tailor boutique and their associated user login account? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      await api.delete(`/admin/tailors/${tailorId}`);
+      alert("Tailor profile and account deleted successfully");
+      loadAdminData();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete tailor partner");
     }
   }
 
@@ -141,6 +163,12 @@ export default function AdminDashboard() {
                         <X size={13} /> Reject
                       </button>
                     )}
+                    <button
+                      onClick={() => handleDelete(tailor._id)}
+                      className="inline-flex items-center justify-center gap-1.5 rounded bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-750 border border-rose-200 hover:bg-rose-100 transition-colors"
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
                     {tailor.verificationStatus !== "pending" && (
                       <button
                         onClick={() => handleVerify(tailor._id, "pending")}
@@ -230,6 +258,13 @@ export default function AdminDashboard() {
                               <X size={14} />
                             </button>
                           )}
+                          <button
+                            onClick={() => handleDelete(tailor._id)}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors"
+                            title="Delete permanently"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                           {tailor.verificationStatus !== "pending" && (
                             <button
                               onClick={() => handleVerify(tailor._id, "pending")}

@@ -36,6 +36,10 @@ export async function upsertProfile(req, res, next) {
       { ...req.body, userId: req.user._id },
       { upsert: true, new: true, runValidators: true }
     );
+
+    const io = req.app.get("io");
+    if (io) io.emit("admin:refresh");
+
     res.json({ tailor: profile });
   } catch (error) {
     next(error);

@@ -76,3 +76,21 @@ export async function listPaymentsAdmin(_req, res, next) {
     next(error);
   }
 }
+
+export async function deleteTailor(req, res, next) {
+  try {
+    const tailor = await Tailor.findById(req.params.id);
+    if (!tailor) {
+      return res.status(404).json({ message: "Tailor not found" });
+    }
+
+    await Promise.all([
+      Tailor.findByIdAndDelete(req.params.id),
+      User.findByIdAndDelete(tailor.userId)
+    ]);
+
+    res.json({ success: true, message: "Tailor profile and user account permanently deleted" });
+  } catch (error) {
+    next(error);
+  }
+}
