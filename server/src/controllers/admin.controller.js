@@ -53,6 +53,10 @@ export async function verifyTailor(req, res, next) {
       { verificationStatus: req.body.verificationStatus },
       { new: true }
     );
+
+    const io = req.app.get("io");
+    if (io) io.emit("tailor:updated", tailor);
+
     res.json({ tailor });
   } catch (error) {
     next(error);

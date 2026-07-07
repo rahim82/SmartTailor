@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 import { getOptimizedImageUrl } from "../lib/imageCompress.js";
+import { socket } from "../lib/socket.js";
 import {
   ArrowRight,
   CalendarDays,
@@ -58,6 +59,16 @@ export default function LandingPage() {
   useEffect(() => {
     fetchTailors();
   }, [serviceFilter]);
+
+  useEffect(() => {
+    socket.connect();
+    socket.on("tailor:updated", fetchTailors);
+
+    return () => {
+      socket.off("tailor:updated", fetchTailors);
+      socket.disconnect();
+    };
+  }, []);
 
   function handleSearchSubmit(e) {
     e.preventDefault();

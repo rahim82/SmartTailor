@@ -7,6 +7,7 @@ import OrderTable from "../components/OrderTable.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
+import { socket } from "../lib/socket.js";
 
 const SERVICE_PRICES = {
   kurta: 600,
@@ -101,7 +102,16 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+
+    socket.connect();
+    socket.emit("user:join", user?.id || user?._id);
+    socket.on("order:updated", loadDashboardData);
+
+    return () => {
+      socket.off("order:updated", loadDashboardData);
+      socket.disconnect();
+    };
+  }, [user]);
 
   useEffect(() => {
     if (location.state?.selectedTailorId && tailors.length > 0) {

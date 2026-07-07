@@ -38,7 +38,10 @@ export async function upsertProfile(req, res, next) {
     );
 
     const io = req.app.get("io");
-    if (io) io.emit("admin:refresh");
+    if (io) {
+      io.emit("admin:refresh");
+      io.emit("tailor:updated", profile);
+    }
 
     res.json({ tailor: profile });
   } catch (error) {

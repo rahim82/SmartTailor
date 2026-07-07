@@ -6,6 +6,7 @@ import OrderTable from "../components/OrderTable.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
+import { socket } from "../lib/socket.js";
 
 export default function TailorDashboard() {
   const { user } = useAuth();
@@ -119,7 +120,16 @@ export default function TailorDashboard() {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+
+    socket.connect();
+    socket.emit("user:join", user?.id || user?._id);
+    socket.on("order:updated", loadDashboard);
+
+    return () => {
+      socket.off("order:updated", loadDashboard);
+      socket.disconnect();
+    };
+  }, [user]);
 
   // Update selected order details on orders changes
   useEffect(() => {

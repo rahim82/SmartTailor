@@ -30,6 +30,7 @@ export async function createOrder(req, res, next) {
         orderId: order._id
       });
       req.app.get("io").to(tailor.userId.toString()).emit("notification:new", notification);
+      req.app.get("io").to(tailor.userId.toString()).emit("order:updated", order);
 
       // WhatsApp/SMS to Tailor User
       const tailorUser = await User.findById(tailor.userId);
