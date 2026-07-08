@@ -305,6 +305,75 @@ export default function TailorDashboard() {
     setIsMeasurementModalOpen(true);
   }
 
+  const getUserId = (userObj) => {
+    if (!userObj) return "";
+    if (typeof userObj === "string") return userObj.trim();
+    const id = userObj._id || userObj.id || "";
+    return typeof id === "string" ? id.trim() : String(id).trim();
+  };
+
+  function openRecordMeasurement(customerId = "", initialGarmentType = "Blouse", measureId = "", isFromOrder = false) {
+    let existing = null;
+
+    if (isFromOrder) {
+      if (measureId) {
+        const targetMeasureId = getUserId(measureId);
+        existing = measurements.find((m) => getUserId(m._id) === targetMeasureId);
+      }
+    } else {
+      const targetId = getUserId(customerId);
+      if (targetId) {
+        existing = measurements.find((m) => {
+          const mCustId = getUserId(m.customerId);
+          return mCustId && mCustId === targetId;
+        });
+      }
+    }
+
+    if (existing) {
+      setMeasurementForm({
+        _id: "",
+        customerId,
+        profileName: existing.profileName || "Self",
+        gender: existing.gender || "female",
+        garmentType: existing.garmentType || initialGarmentType,
+        chest: existing.values?.chest || "",
+        waist: existing.values?.waist || "",
+        hip: existing.values?.hip || "",
+        shoulder: existing.values?.shoulder || "",
+        sleeve: existing.values?.sleeve || "",
+        neck: existing.values?.neck || "",
+        inseam: existing.values?.inseam || "",
+        length: existing.values?.length || "",
+        armhole: existing.values?.armhole || "",
+        blouseLength: existing.values?.blouseLength || "",
+        salwarLength: existing.values?.salwarLength || "",
+        notes: existing.notes || ""
+      });
+    } else {
+      setMeasurementForm({
+        _id: "",
+        customerId,
+        profileName: "Customer Profile",
+        gender: "female",
+        garmentType: initialGarmentType,
+        chest: "",
+        waist: "",
+        hip: "",
+        shoulder: "",
+        sleeve: "",
+        neck: "",
+        inseam: "",
+        length: "",
+        armhole: "",
+        blouseLength: "",
+        salwarLength: "",
+        notes: ""
+      });
+    }
+    setIsMeasurementModalOpen(true);
+  }
+
   // Delete Action Clicked
   async function handleDeleteClick(id) {
     if (!confirm("Are you sure you want to delete this measurement profile?")) return;
@@ -551,26 +620,7 @@ export default function TailorDashboard() {
             <button
               onClick={() => {
                 setSelectedOrder(null);
-                setMeasurementForm({
-                  _id: "",
-                  customerId: customers[0]?._id || "",
-                  profileName: "Customer Profile",
-                  gender: "female",
-                  garmentType: "Blouse",
-                  chest: "",
-                  waist: "",
-                  hip: "",
-                  shoulder: "",
-                  sleeve: "",
-                  neck: "",
-                  inseam: "",
-                  length: "",
-                  armhole: "",
-                  blouseLength: "",
-                  salwarLength: "",
-                  notes: ""
-                });
-                setIsMeasurementModalOpen(true);
+                openRecordMeasurement();
               }}
               className="inline-flex items-center justify-center gap-2 rounded-md border border-black/15 bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-black/[0.02]"
             >
@@ -691,26 +741,8 @@ export default function TailorDashboard() {
                       </button>
                       <button
                         onClick={() => {
-                          setMeasurementForm({
-                            _id: "",
-                            customerId: selectedOrder.customerId?._id || selectedOrder.customerId || "",
-                            profileName: "Customer Profile",
-                            gender: "female",
-                            garmentType: selectedOrder.garmentType,
-                            chest: "",
-                            waist: "",
-                            hip: "",
-                            shoulder: "",
-                            sleeve: "",
-                            neck: "",
-                            inseam: "",
-                            length: "",
-                            armhole: "",
-                            blouseLength: "",
-                            salwarLength: "",
-                            notes: ""
-                          });
-                          setIsMeasurementModalOpen(true);
+                          const custId = selectedOrder.customerId?._id || selectedOrder.customerId || "";
+                          openRecordMeasurement(custId, selectedOrder.garmentType, selectedOrder.measurementId, true);
                         }}
                         className="flex-1 rounded border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-ink text-center hover:bg-black/[0.02]"
                       >
@@ -1094,7 +1126,57 @@ export default function TailorDashboard() {
                     required
                     disabled={Boolean(measurementForm._id)} // Don't let edit customer once created
                     value={measurementForm.customerId}
-                    onChange={(e) => setMeasurementForm({ ...measurementForm, customerId: e.target.value })}
+                    onChange={(e) => {
+                      const customerId = e.target.value;
+                      const targetId = getUserId(customerId);
+                      const existing = targetId
+                        ? measurements.find((m) => {
+                            const mCustId = getUserId(m.customerId);
+                            return mCustId && mCustId === targetId;
+                          })
+                        : null;
+                      if (existing) {
+                        setMeasurementForm({
+                          ...measurementForm,
+                          customerId,
+                          profileName: existing.profileName || "Self",
+                          gender: existing.gender || "female",
+                          garmentType: existing.garmentType || "Blouse",
+                          chest: existing.values?.chest || "",
+                          waist: existing.values?.waist || "",
+                          hip: existing.values?.hip || "",
+                          shoulder: existing.values?.shoulder || "",
+                          sleeve: existing.values?.sleeve || "",
+                          neck: existing.values?.neck || "",
+                          inseam: existing.values?.inseam || "",
+                          length: existing.values?.length || "",
+                          armhole: existing.values?.armhole || "",
+                          blouseLength: existing.values?.blouseLength || "",
+                          salwarLength: existing.values?.salwarLength || "",
+                          notes: existing.notes || ""
+                        });
+                      } else {
+                        setMeasurementForm({
+                          ...measurementForm,
+                          customerId,
+                          profileName: "Customer Profile",
+                          gender: "female",
+                          garmentType: "Blouse",
+                          chest: "",
+                          waist: "",
+                          hip: "",
+                          shoulder: "",
+                          sleeve: "",
+                          neck: "",
+                          inseam: "",
+                          length: "",
+                          armhole: "",
+                          blouseLength: "",
+                          salwarLength: "",
+                          notes: ""
+                        });
+                      }
+                    }}
                     className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch disabled:bg-black/[0.03]"
                   >
                     <option value="">Select customer...</option>
@@ -1254,26 +1336,8 @@ export default function TailorDashboard() {
                 </button>
                 <button
                   onClick={() => {
-                    setMeasurementForm({
-                      _id: "",
-                      customerId: selectedOrder.customerId?._id || selectedOrder.customerId || "",
-                      profileName: "Customer Profile",
-                      gender: "female",
-                      garmentType: selectedOrder.garmentType,
-                      chest: "",
-                      waist: "",
-                      hip: "",
-                      shoulder: "",
-                      sleeve: "",
-                      neck: "",
-                      inseam: "",
-                      length: "",
-                      armhole: "",
-                      blouseLength: "",
-                      salwarLength: "",
-                      notes: ""
-                    });
-                    setIsMeasurementModalOpen(true);
+                    const custId = selectedOrder.customerId?._id || selectedOrder.customerId || "";
+                    openRecordMeasurement(custId, selectedOrder.garmentType, selectedOrder.measurementId, true);
                   }}
                   className="flex-1 rounded border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-ink text-center hover:bg-black/[0.02]"
                 >

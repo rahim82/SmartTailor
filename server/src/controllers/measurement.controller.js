@@ -1,4 +1,6 @@
 import { Measurement } from "../models/Measurement.js";
+import { Order } from "../models/Order.js";
+import { Tailor } from "../models/Tailor.js";
 
 export async function createMeasurement(req, res, next) {
   try {
@@ -12,7 +14,27 @@ export async function createMeasurement(req, res, next) {
 
 export async function listMeasurements(req, res, next) {
   try {
-    const filter = req.user.role === "customer" ? { customerId: req.user._id } : {};
+    let filter = {};
+    if (req.user.role === "customer") {
+      filter = { customerId: req.user._id };
+    } else if (req.user.role === "tailor") {
+      const tailor = await Tailor.findOne({ userId: req.user._id });
+      if (tailor) {
+        const orders = await Order.find({ tailorId: tailor._id });
+        const measurementIds = orders.map(o => o.measurementId).filter(Boolean);
+
+        filter = {
+          $or: [
+            { createdBy: req.user._id },
+            { tailorId: tailor._id },
+            { _id: { $in: measurementIds } }
+          ]
+        };
+      } else {
+        filter = { createdBy: req.user._id };
+      }
+    }
+
     const measurements = await Measurement.find(filter).populate("customerId", "name phone").sort({ updatedAt: -1 });
     res.json({ measurements });
   } catch (error) {
