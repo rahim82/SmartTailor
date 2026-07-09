@@ -354,14 +354,16 @@ export default function CustomerDashboard() {
         rzp.open();
       } else {
         const simulate = confirm(
-          "Razorpay integration requires environment configurations. Would you like to simulate a successful payment?"
+          "Online Payments are currently in TEST/SANDBOX mode.\n\n" +
+          "To process live payments, Razorpay credentials must be added to your environment configurations.\n\n" +
+          "Would you like to simulate a successful test payment to mark this order as paid?"
         );
         if (simulate) {
           await api.post("/payments/verify", {
             razorpay_order_id: payment.razorpayOrderId,
             isSimulated: true
           });
-          alert("Simulated payment success!");
+          alert("✓ Test Payment Simulated Successfully! Order is now marked as Paid.");
           loadDashboardData();
         }
       }

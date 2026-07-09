@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { Order } from "../models/Order.js";
 import { Tailor } from "../models/Tailor.js";
 import { User } from "../models/User.js";
@@ -122,3 +123,166 @@ export async function updateOrderStatus(req, res, next) {
     next(error);
   }
 }
+
+export async function trackOrder(req, res, next) {
+  try {
+    const { orderNo, phone } = req.query;
+    if (!orderNo || !phone) {
+      return res.status(400).json({ message: "Order Number and Phone Number are required" });
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    
+    // Find order by orderNo (case insensitive)
+    const order = await Order.findOne({ orderNo: new RegExp(`^${orderNo.trim()}$`, "i") })
+      .populate("customerId")
+      .populate("tailorId", "shopName location workingHours portfolioImages");
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Compare customer's phone suffix (last 10 digits)
+    const dbCustomerPhone = order.customerId?.phone || "";
+    const cleanDbPhone = dbCustomerPhone.replace(/\D/g, "");
+    
+    if (cleanDbPhone.slice(-10) !== cleanPhone.slice(-10)) {
+      return res.status(403).json({ message: "Incorrect phone number for this order" });
+    }
+
+    // Return tracking status details (excluding security-sensitive info)
+    res.json({
+      orderNo: order.orderNo,
+      garmentType: order.garmentType,
+      status: order.status,
+      statusHistory: order.statusHistory,
+      dueDate: order.dueDate,
+      trialDate: order.trialDate,
+      deliveryDate: order.deliveryDate,
+      paymentStatus: order.paymentStatus,
+      pricing: {
+        stitchingCharge: order.pricing.stitchingCharge,
+        fabricCharge: order.pricing.fabricCharge,
+        discount: order.pricing.discount,
+        total: order.pricing.total
+      },
+      instructions: order.instructions,
+      fabricProvidedBy: order.fabricProvidedBy,
+      tailor: {
+        shopName: order.tailorId?.shopName,
+        location: order.tailorId?.location,
+        workingHours: order.tailorId?.workingHours
+      },
+      createdAt: order.createdAt
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createWalkInOrder(req, res, next) {
+  try {
+    const {
+      customerPhone,
+      customerName,
+      garmentType,
+      fabricProvidedBy,
+      instructions,
+      dueDate,
+      pricing,
+      measurementId
+    } = req.body;
+
+    if (!customerPhone || !customerName || !garmentType) {
+      return res.status(400).json({ message: "Customer phone, name, and garment type are required" });
+    }
+
+    // Find tailor profile associated with current logged-in tailor user
+    const tailor = await Tailor.findOne({ userId: req.user._id });
+    if (!tailor) {
+      return res.status(404).json({ message: "Tailor profile not found. Please complete profile details first." });
+    }
+
+    // Check if customer exists (match last 10 digits to handle formatting/+91 prefixes)
+    const cleanPhoneDigits = customerPhone.replace(/\D/g, "");
+    let customer;
+    if (cleanPhoneDigits.length >= 10) {
+      const phoneRegex = new RegExp(`${cleanPhoneDigits.slice(-10)}$`);
+      customer = await User.findOne({ phone: { $regex: phoneRegex }, role: "customer" });
+    } else {
+      customer = await User.findOne({ phone: customerPhone, role: "customer" });
+    }
+    let isNewCustomer = false;
+    let tempPassword = "";
+
+    if (!customer) {
+      isNewCustomer = true;
+      // Auto-register customer with a temporary password (last 6 digits of their phone)
+      tempPassword = customerPhone.replace(/\D/g, "").slice(-6) || "123456";
+      const passwordHash = await bcrypt.hash(tempPassword, 12);
+      customer = await User.create({
+        name: customerName,
+        phone: customerPhone,
+        passwordHash,
+        role: "customer"
+      });
+    }
+
+    // Calculate total charge
+    const stitching = Number(pricing?.stitchingCharge) || 0;
+    const fabric = Number(pricing?.fabricCharge) || 0;
+    const discount = Number(pricing?.discount) || 0;
+    const total = stitching + fabric - discount;
+
+    // Create walk-in order
+    const order = await Order.create({
+      orderNo: makeOrderNo(),
+      customerId: customer._id,
+      tailorId: tailor._id,
+      garmentType,
+      fabricProvidedBy: fabricProvidedBy || "customer",
+      instructions,
+      dueDate: dueDate || undefined,
+      pricing: {
+        stitchingCharge: stitching,
+        fabricCharge: fabric,
+        discount: discount,
+        total: total > 0 ? total : 0
+      },
+      measurementId: measurementId || undefined,
+      status: "placed",
+      statusHistory: [{ status: "placed", note: "Walk-in order created by tailor", changedBy: req.user._id }]
+    });
+
+    // Notify clients via socket
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("admin:refresh");
+      io.to(customer._id.toString()).emit("order:updated", order);
+      io.to(req.user._id.toString()).emit("order:updated", order);
+    }
+
+    // Send in-app notification to customer
+    await Notification.create({
+      userId: customer._id,
+      type: "order",
+      title: "New order placed",
+      message: `Your stitching order ${order.orderNo} for ${order.garmentType} has been successfully registered.`,
+      orderId: order._id
+    });
+
+    res.status(201).json({
+      order,
+      customer: {
+        id: customer._id,
+        name: customer.name,
+        phone: customer.phone,
+        isNew: isNewCustomer,
+        tempPassword
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+

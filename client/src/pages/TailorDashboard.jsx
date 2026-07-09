@@ -75,6 +75,130 @@ export default function TailorDashboard() {
     notes: ""
   });
 
+  const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [successOrderData, setSuccessOrderData] = useState(null);
+  const [customGarmentName, setCustomGarmentName] = useState("");
+
+  const [walkInForm, setWalkInForm] = useState({
+    customerPhone: "",
+    customerName: "",
+    garmentType: "",
+    fabricProvidedBy: "customer",
+    instructions: "",
+    dueDate: "",
+    stitchingCharge: "",
+    fabricCharge: "",
+    discount: "",
+    measurementId: ""
+  });
+
+  function handleWalkInPhoneChange(phoneVal) {
+    const digitsOnlyInput = phoneVal.replace(/\D/g, "");
+    
+    const foundCust = customers.find(c => {
+      const dbPhDigits = (c.phone || "").replace(/\D/g, "");
+      if (digitsOnlyInput.length >= 10 && dbPhDigits.length >= 10) {
+        return dbPhDigits.slice(-10) === digitsOnlyInput.slice(-10);
+      }
+      return dbPhDigits === digitsOnlyInput && dbPhDigits.length > 0;
+    });
+    
+    if (foundCust) {
+      const custMeasurements = measurements.filter(m => getUserId(m.customerId) === foundCust._id);
+      setWalkInForm(prev => ({
+        ...prev,
+        customerPhone: phoneVal,
+        customerName: foundCust.name,
+        measurementId: custMeasurements[0]?._id || ""
+      }));
+    } else {
+      setWalkInForm(prev => ({
+        ...prev,
+        customerPhone: phoneVal,
+        customerName: digitsOnlyInput.length === 0 ? "" : prev.customerName,
+        measurementId: ""
+      }));
+    }
+  }
+
+  async function handleWalkInSubmit(e) {
+    e.preventDefault();
+    try {
+      const gType = walkInForm.garmentType === "custom_other" ? customGarmentName : walkInForm.garmentType;
+      if (!gType || !gType.trim()) {
+        alert("Please specify a garment type.");
+        return;
+      }
+
+      const payload = {
+        customerPhone: walkInForm.customerPhone,
+        customerName: walkInForm.customerName,
+        garmentType: gType,
+        fabricProvidedBy: walkInForm.fabricProvidedBy,
+        instructions: walkInForm.instructions,
+        dueDate: walkInForm.dueDate || undefined,
+        pricing: {
+          stitchingCharge: parseFloat(walkInForm.stitchingCharge) || 0,
+          fabricCharge: parseFloat(walkInForm.fabricCharge) || 0,
+          discount: parseFloat(walkInForm.discount) || 0
+        },
+        measurementId: walkInForm.measurementId || undefined
+      };
+
+      const res = await api.post("/orders/walk-in", payload);
+      setIsWalkInModalOpen(false);
+      setSuccessOrderData(res.data);
+      setIsSuccessModalOpen(true);
+      
+      // Reset form
+      setWalkInForm({
+        customerPhone: "",
+        customerName: "",
+        garmentType: "",
+        fabricProvidedBy: "customer",
+        instructions: "",
+        dueDate: "",
+        stitchingCharge: "",
+        fabricCharge: "",
+        discount: "",
+        measurementId: ""
+      });
+      setCustomGarmentName("");
+      
+      loadDashboard();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to create walk-in order");
+    }
+  }
+
+  function handleSendWalkInWhatsApp() {
+    if (!successOrderData) return;
+    const { order, customer } = successOrderData;
+    const phone = customer.phone;
+    if (!phone) {
+      alert("Customer phone is missing.");
+      return;
+    }
+
+    let cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length === 10) {
+      cleanPhone = `91${cleanPhone}`;
+    }
+
+    const trackingUrl = `${window.location.origin}/track?orderNo=${order.orderNo}&phone=${customer.phone}`;
+    
+    let message = `Hello ${customer.name}, your stitching order ${order.orderNo} for ${order.garmentType} has been successfully registered at "${profile?.shopName || "our boutique"}". \n\nYou can track the live progress here: ${trackingUrl}\nOrder ID: ${order.orderNo}\nPhone: ${customer.phone}`;
+    
+    if (customer.isNew && customer.tempPassword) {
+      message += `\n\nTo view all your details and historical orders, you can also log in to our web portal with Password: ${customer.tempPassword}`;
+    }
+    
+    const encodedText = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
+    window.open(whatsappUrl, "_blank");
+  }
+
   async function loadDashboard() {
     try {
       setLoading(true);
@@ -625,6 +749,14 @@ export default function TailorDashboard() {
               className="inline-flex items-center justify-center gap-2 rounded-md border border-black/15 bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-black/[0.02]"
             >
               <Ruler size={16} /> Record Measurement
+            </button>
+          )}
+          {activeTab === "orders" && (
+            <button
+              onClick={() => setIsWalkInModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-stitch px-4 py-2.5 text-sm font-medium text-white transition hover:bg-stitch/90"
+            >
+              <Scissors size={16} /> New Walk-in Order
             </button>
           )}
           <button
@@ -1353,6 +1485,251 @@ export default function TailorDashboard() {
                   <MessageSquare size={13} className="text-emerald-600" /> Send Free WhatsApp Alert
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Walk-in Order Modal */}
+      {isWalkInModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-xl rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <button 
+              onClick={() => setIsWalkInModalOpen(false)}
+              className="absolute right-4 top-4 text-ink/50 hover:text-ink transition"
+            >
+              <X size={20} />
+            </button>
+            
+            <h3 className="text-xl font-bold border-b border-black/10 pb-3 text-ink">
+              Create Walk-in / Direct Order
+            </h3>
+            
+            <form onSubmit={handleWalkInSubmit} className="mt-4 space-y-4">
+              {/* Customer Contact */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Customer Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 9876543210"
+                    value={walkInForm.customerPhone}
+                    onChange={(e) => handleWalkInPhoneChange(e.target.value)}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Customer Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter full name"
+                    value={walkInForm.customerName}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, customerName: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+              </div>
+
+              {/* Garment & Catalog */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Garment Selection *</label>
+                  <select
+                    required
+                    value={walkInForm.garmentType}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const matched = profile?.services?.find(s => s.name === val);
+                      setWalkInForm(prev => ({
+                        ...prev,
+                        garmentType: val,
+                        stitchingCharge: matched ? matched.price.toString() : prev.stitchingCharge
+                      }));
+                    }}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  >
+                    <option value="">Select garment type...</option>
+                    {profile?.services?.map((s, idx) => (
+                      <option key={idx} value={s.name}>{s.name} (₹{s.price})</option>
+                    ))}
+                    <option value="custom_other">-- Other Custom Garment --</option>
+                  </select>
+                </div>
+
+                {/* Conditional Custom Garment Name */}
+                {walkInForm.garmentType === "custom_other" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-stitch">Custom Garment Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Designer Gown"
+                      value={customGarmentName}
+                      onChange={(e) => setCustomGarmentName(e.target.value)}
+                      className="mt-1 w-full rounded border border-stitch/30 px-3 py-2 text-sm outline-none focus:border-stitch"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Pricing & Fabric */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Stitching Charge (₹)</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="0"
+                    value={walkInForm.stitchingCharge}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, stitchingCharge: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Fabric Charge (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={walkInForm.fabricCharge}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, fabricCharge: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Discount (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={walkInForm.discount}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, discount: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+              </div>
+
+              {/* Fabric Source, Due Date, Measurements */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Fabric Provider</label>
+                  <select
+                    value={walkInForm.fabricProvidedBy}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, fabricProvidedBy: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  >
+                    <option value="customer">Customer</option>
+                    <option value="tailor">Tailor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Due Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={walkInForm.dueDate}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, dueDate: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink/75">Measurement Profile</label>
+                  <select
+                    value={walkInForm.measurementId}
+                    onChange={(e) => setWalkInForm({ ...walkInForm, measurementId: e.target.value })}
+                    className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch"
+                  >
+                    <option value="">None (Record later)</option>
+                    {measurements
+                      .filter(m => {
+                        const targetPhone = walkInForm.customerPhone.trim();
+                        return m.customerId?.phone?.trim() === targetPhone || getUserId(m.customerId) === walkInForm.measurementId;
+                      })
+                      .map((m) => (
+                        <option key={m._id} value={m._id}>
+                          {m.profileName || "Profile"} ({m.garmentType})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Special Instructions */}
+              <div>
+                <label className="block text-xs font-semibold text-ink/75">Stitching Instructions</label>
+                <textarea
+                  placeholder="e.g. Side zippers, sleeve style, collar depth, neck pattern design details..."
+                  value={walkInForm.instructions}
+                  onChange={(e) => setWalkInForm({ ...walkInForm, instructions: e.target.value })}
+                  rows={2}
+                  className="mt-1 w-full rounded border border-black/15 px-3 py-2 text-sm outline-none focus:border-stitch resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded bg-stitch px-4 py-3 font-semibold text-white transition hover:bg-stitch/90 mt-2 hover:shadow-md"
+              >
+                Create Order & Generate ID
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Success Walk-In Confirmation Modal */}
+      {isSuccessModalOpen && successOrderData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl text-center">
+            <h3 className="text-2xl font-black text-emerald-600 mb-2">Order Created Successfully!</h3>
+            <p className="text-sm text-ink/65 mb-6">
+              Walk-in order has been recorded in the database.
+            </p>
+
+            <div className="rounded-lg bg-linen/25 border border-black/5 p-4 text-left space-y-2 mb-6">
+              <div className="flex justify-between text-sm">
+                <span className="text-ink/65">Order Number:</span>
+                <span className="font-bold text-ink">{successOrderData.order.orderNo}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-ink/65">Customer Name:</span>
+                <span className="font-bold text-ink">{successOrderData.customer.name}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-ink/65">Phone Number:</span>
+                <span className="font-bold text-ink">{successOrderData.customer.phone}</span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-black/5 pt-2">
+                <span className="text-ink/65">Garment:</span>
+                <span className="font-bold text-stitch">{successOrderData.order.garmentType}</span>
+              </div>
+              
+              {successOrderData.customer.isNew && successOrderData.customer.tempPassword && (
+                <div className="mt-3 p-2 bg-emerald-50 rounded border border-emerald-100 text-xs text-emerald-800">
+                  <p className="font-bold">New User Account Registered!</p>
+                  <p className="mt-0.5">Temporary login password: <span className="font-mono font-bold select-all text-sm">{successOrderData.customer.tempPassword}</span></p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleSendWalkInWhatsApp}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-emerald-650 bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 shadow"
+              >
+                <MessageSquare size={18} /> Send WhatsApp Alert (Free)
+              </button>
+              <button
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full rounded-md border border-black/15 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-black/[0.02]"
+              >
+                Close & Return
+              </button>
             </div>
           </div>
         </div>

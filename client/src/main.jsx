@@ -11,6 +11,7 @@ const AuthPage = lazy(() => import("./pages/AuthPage.jsx"));
 const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard.jsx"));
 const TailorDashboard = lazy(() => import("./pages/TailorDashboard.jsx"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard.jsx"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder.jsx"));
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -24,6 +25,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Routes>
             <Route element={<App />}>
               <Route index element={<LandingPage />} />
+              <Route path="track" element={<TrackOrder />} />
               <Route path="auth" element={<AuthPage />} />
               <Route path="customer" element={<ProtectedRoute roles={["customer"]}><CustomerDashboard /></ProtectedRoute>} />
               <Route path="tailor" element={<ProtectedRoute roles={["tailor"]}><TailorDashboard /></ProtectedRoute>} />

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { dashboardPath } from "../lib/routes.js";
 
 const navItems = [
+  { to: "/track", label: "Track Order" },
   { to: "/customer", label: "Customer" },
   { to: "/tailor", label: "Tailor" },
   { to: "/admin", label: "Admin" }
