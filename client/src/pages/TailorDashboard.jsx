@@ -31,6 +31,7 @@ export default function TailorDashboard() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isMeasurementModalOpen, setIsMeasurementModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
@@ -210,7 +211,14 @@ export default function TailorDashboard() {
       
       setProfile(res.data.tailor);
       setStats(res.data.stats || { activeOrders: 0 });
-      setOrders(res.data.orders || []);
+      const rawOrders = res.data.orders || [];
+      const sortedOrders = [...rawOrders].sort((a, b) => {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;   // no due date goes to end
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate); // earliest first
+      });
+      setOrders(sortedOrders);
       setMeasurements(measurementsRes.data.measurements || []);
       setCustomers(customersRes.data.customers || []);
       setProfileMissing(false);
@@ -329,6 +337,19 @@ export default function TailorDashboard() {
       loadDashboard();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to update status");
+    }
+  }
+
+  // Delete completed/cancelled order
+  async function handleDeleteOrder() {
+    if (!selectedOrder) return;
+    try {
+      await api.delete(`/tailors/orders/${selectedOrder._id}`);
+      setIsDeleteModalOpen(false);
+      setSelectedOrder(null);
+      loadDashboard();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete order");
     }
   }
 
@@ -882,13 +903,30 @@ export default function TailorDashboard() {
                       </button>
                     </div>
 
-                    <div className="mt-2.5 border-t border-black/[0.04] pt-2.5">
+                    <div className="mt-2.5 border-t border-black/[0.04] pt-2.5 space-y-2">
                       <button
                         onClick={handleSendFreeWhatsApp}
                         className="w-full rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 text-center hover:bg-emerald-100 transition flex items-center justify-center gap-1.5"
                       >
                         <MessageSquare size={13} className="text-emerald-600" /> Send Free WhatsApp Alert
                       </button>
+
+                      {/* Delete button — only for delivered or cancelled orders */}
+                      {["delivered", "cancelled"].includes(selectedOrder.status) && (
+                        <button
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="w-full rounded border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 text-center hover:bg-red-100 transition flex items-center justify-center gap-1.5"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4h6v2" />
+                          </svg>
+                          Delete Order
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1211,7 +1249,7 @@ export default function TailorDashboard() {
               <div>
                 <label className="block text-xs font-semibold text-ink/75">Progress Note / Remarks</label>
                 <textarea
-                  required
+                  
                   placeholder="e.g. Cut pieces ready. Starting stitches on shoulders."
                   value={statusForm.note}
                   onChange={(e) => setStatusForm({ ...statusForm, note: e.target.value })}
@@ -1729,6 +1767,44 @@ export default function TailorDashboard() {
                 className="w-full rounded-md border border-black/15 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-black/[0.02]"
               >
                 Close & Return
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Order Confirmation Modal */}
+      {isDeleteModalOpen && selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            {/* Icon */}
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 border border-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  <path d="M10 11v6" /><path d="M14 11v6" />
+                  <path d="M9 6V4h6v2" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-center text-lg font-bold text-ink">Delete Order?</h3>
+            <p className="mt-2 text-center text-sm text-ink/60">
+              Are you sure you want to permanently delete order{" "}
+              <span className="font-semibold text-ink">{selectedOrder.orderNo}</span>?
+              This action cannot be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 rounded-lg border border-black/15 bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-black/[0.02] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteOrder}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-600 transition"
+              >
+                Yes, Delete
               </button>
             </div>
           </div>

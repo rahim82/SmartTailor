@@ -285,4 +285,35 @@ export async function createWalkInOrder(req, res, next) {
     next(error);
   }
 }
+export async function deleteOrder(req, res, next) {
+  try {
+    const tailor = await Tailor.findOne({ userId: req.user._id });
+    if (!tailor) return res.status(404).json({ message: "Tailor profile not found" });
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Only allow deletion of completed (delivered or cancelled) orders
+    if (!["delivered", "cancelled"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Only delivered or cancelled orders can be deleted"
+      });
+    }
+
+    // Ensure the order belongs to this tailor
+    if (order.tailorId.toString() !== tailor._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this order" });
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    // Notify via socket
+    const io = req.app.get("io");
+    if (io) io.emit("admin:refresh");
+
+    res.json({ message: "Order deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
 
