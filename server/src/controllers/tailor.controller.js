@@ -55,7 +55,7 @@ export async function tailorDashboard(req, res, next) {
     if (!tailor) return res.status(404).json({ message: "Create tailor profile first" });
 
     const [orders, dueSoon] = await Promise.all([
-      Order.find({ tailorId: tailor._id }).populate("customerId", "name phone").sort({ createdAt: -1 }).limit(20),
+      Order.find({ tailorId: tailor._id }).populate("customerId", "name phone").sort({ dueDate: 1 }).limit(20),
       Order.countDocuments({ tailorId: tailor._id, status: { $nin: ["delivered", "cancelled"] } })
     ]);
 

@@ -214,7 +214,7 @@ export default function TailorDashboard() {
       const rawOrders = res.data.orders || [];
       const sortedOrders = [...rawOrders].sort((a, b) => {
         if (!a.dueDate && !b.dueDate) return 0;
-        if (!a.dueDate) return 1;   // no due date goes to end
+        if (!a.dueDate) return 1;   // no due date → end
         if (!b.dueDate) return -1;
         return new Date(a.dueDate) - new Date(b.dueDate); // earliest first
       });
