@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { api } from "../lib/api.js";
+import SEO from "../components/SEO.jsx";
 import { Scissors, Search, Calendar, MapPin, Phone, User, CheckCircle2, ChevronRight, AlertCircle, ShoppingBag, Clock } from "lucide-react";
 
 const STAGES = [
@@ -70,6 +71,12 @@ export default function TrackOrder() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <SEO
+        title="Track Stitching Order Status"
+        description="Check real-time status of your custom stitching order, trial runs, and estimated delivery dates."
+        keywords="track tailor order, tailoring status, stitching stage, SmartTailor tracking"
+        canonicalUrl="https://smart-tailor-phi.vercel.app/track"
+      />
       {/* Page Title */}
       <div className="text-center max-w-xl mx-auto mb-10">
         <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">

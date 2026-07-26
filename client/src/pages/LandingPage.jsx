@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 import { getOptimizedImageUrl } from "../lib/imageCompress.js";
 import { socket } from "../lib/socket.js";
+import SEO from "../components/SEO.jsx";
 import {
   ArrowRight,
   CalendarDays,
@@ -96,6 +97,12 @@ export default function LandingPage() {
 
   return (
     <main className="relative min-h-screen bg-transparent overflow-hidden">
+      <SEO
+        title="Book Top Tailors & Custom Outfits Online"
+        description="Find verified custom tailors, book stitching for suits, blouses, kurtas & dresses, save digital measurements, and track order progress with SmartTailor."
+        keywords="tailor shop near me, online stitching, boutique tailor, dress alteration, suit tailor, custom blouse tailoring, SmartTailor"
+        canonicalUrl="https://smart-tailor-phi.vercel.app/"
+      />
       {/* Sleek Gradient Blobs & SVGs for Premium Vibe */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-saffron/15 blur-[120px] animate-float-1" />

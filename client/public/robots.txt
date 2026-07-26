@@ -1,0 +1,14 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /track
+Allow: /auth
+
+# Disallow private user dashboards & internal routes
+Disallow: /customer/
+Disallow: /tailor/
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://smart-tailor-phi.vercel.app/sitemap.xml
