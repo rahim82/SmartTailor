@@ -21,6 +21,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [notice] = useState(location.state?.resetMessage || "");
   function update(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -130,12 +131,18 @@ export default function AuthPage() {
             </div>
           </div>
           {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {notice && <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-800">{notice}</p>}
           <button 
             disabled={busy} 
             className="w-full rounded-lg bg-ink hover:bg-ink/90 active:scale-[0.99] px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-60 disabled:pointer-events-none"
           >
             {busy ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
           </button>
+          {mode === "login" && (
+            <button type="button" onClick={() => navigate("/forgot-password")} className="w-full text-sm font-medium text-stitch hover:underline">
+              Forgot password?
+            </button>
+          )}
         </form>
       </section>
     </main>

@@ -17,5 +17,8 @@ export const env = {
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || "",
   twilioSid: process.env.TWILIO_ACCOUNT_SID || "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
-  twilioFrom: process.env.TWILIO_PHONE_NUMBER || ""
+  twilioFrom: process.env.TWILIO_PHONE_NUMBER || "",
+  brevoApiKey: process.env.BREVO_API_KEY || "",
+  brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || "",
+  brevoSenderName: process.env.BREVO_SENDER_NAME || "SmartTailor",
 };

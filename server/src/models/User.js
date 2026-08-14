@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true, trim: true },
     email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
+    resetPasswordCodeHash: String,
+    resetPasswordExpiresAt: Date,
+    resetPasswordTokenHash: String,
+    resetPasswordTokenExpiresAt: Date,
     role: { type: String, enum: ["customer", "tailor", "admin"], default: "customer" },
     avatarUrl: String,
     address: {

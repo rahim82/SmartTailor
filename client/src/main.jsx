@@ -9,6 +9,7 @@ import "./styles.css";
 
 const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
 const AuthPage = lazy(() => import("./pages/AuthPage.jsx"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage.jsx"));
 const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard.jsx"));
 const TailorDashboard = lazy(() => import("./pages/TailorDashboard.jsx"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard.jsx"));
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <Route index element={<LandingPage />} />
                 <Route path="track" element={<TrackOrder />} />
                 <Route path="auth" element={<AuthPage />} />
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="customer" element={<ProtectedRoute roles={["customer"]}><CustomerDashboard /></ProtectedRoute>} />
                 <Route path="tailor" element={<ProtectedRoute roles={["tailor"]}><TailorDashboard /></ProtectedRoute>} />
                 <Route path="admin" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />

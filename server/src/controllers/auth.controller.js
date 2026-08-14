@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { User } from "../models/User.js";
 import { signAccessToken } from "../utils/tokens.js";
+import { sendPasswordResetEmail } from "../services/email.service.js";
 
 export async function register(req, res, next) {
   try {
@@ -54,4 +56,56 @@ export async function login(req, res, next) {
 
 export async function me(req, res) {
   res.json({ user: req.user });
+}
+
+
+export async function forgotPassword(req, res, next) {
+  try {
+    const { email } = req.body;
+    if (typeof email !== "string" || !email.trim()) return res.status(400).json({ message: "Email is required" });
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+    const message = "If an account exists for this email, a password reset link has been sent.";
+    if (!user) return res.json({ message });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetPasswordTokenExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/forgot-password?token=${resetToken}`;
+    try {
+      await sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
+    } catch (error) {
+      user.resetPasswordTokenHash = undefined;
+      user.resetPasswordTokenExpiresAt = undefined;
+      await user.save();
+      throw error;
+    }
+
+    res.json({ message });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const { token, password } = req.body;
+    if (typeof token !== "string" || typeof password !== "string") return res.status(400).json({ message: "Reset link and new password are required" });
+    if (password.length < 8) return res.status(400).json({ message: "New password must be at least 8 characters" });
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({ resetPasswordTokenHash: tokenHash, resetPasswordTokenExpiresAt: { $gt: new Date() } });
+    if (!user) return res.status(400).json({ message: "This reset link is invalid or has expired" });
+
+    user.passwordHash = await bcrypt.hash(password, 12);
+    user.resetPasswordTokenHash = undefined;
+    user.resetPasswordTokenExpiresAt = undefined;
+    await user.save();
+    res.json({ message: "Password reset successfully. You can now log in." });
+  } catch (error) {
+    next(error);
+  }
 }
