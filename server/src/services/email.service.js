@@ -33,36 +33,47 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-export async function sendLoginSuccessEmail({ to, name }) {
+async function sendEmail({ to, subject, text, html, simulatorLabel }) {
   if (!to) return { success: false, skipped: true };
 
-  if (!smtpTransporter) {
-    console.log(`[SIMULATOR - LOGIN SUCCESS] ${to}`);
-    return { success: true, simulated: true };
+  if (env.resendApiKey && env.resendFrom) {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.resendApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ from: env.resendFrom, to: [to], subject, text, html })
+    });
+
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.message || "Resend could not send the email");
+    }
+
+    return { success: true, provider: "resend" };
   }
 
-  await smtpTransporter.sendMail({
-    from: env.smtpFrom,
+  if (smtpTransporter) {
+    await smtpTransporter.sendMail({ from: env.smtpFrom, to, subject, text, html });
+    return { success: true, provider: "smtp" };
+  }
+
+  console.log(`[SIMULATOR - ${simulatorLabel}] ${to}`);
+  return { success: true, simulated: true };
+}
+
+export async function sendLoginSuccessEmail({ to, name }) {
+  return sendEmail({
     to,
     subject: "Successful login to SmartTailor",
     text: `Hello ${name || "there"}, you successfully logged in to your SmartTailor account.`,
-    html: `<p>Hello ${name || "there"},</p><p>You successfully logged in to your SmartTailor account.</p><p>If this was not you, please reset your password immediately.</p>`,
+    html: `<p>Hello ${escapeHtml(name || "there")},</p><p>You successfully logged in to your SmartTailor account.</p><p>If this was not you, please reset your password immediately.</p>`,
+    simulatorLabel: "LOGIN SUCCESS"
   });
-
-  return { success: true };
 }
 
-async function sendSmtpEmail({ to, subject, text, html, simulatorLabel }) {
-  if (!to) return { success: false, skipped: true };
-
-  if (!smtpTransporter) {
-    console.log(`[SIMULATOR - ${simulatorLabel}] ${to}`);
-    return { success: true, simulated: true };
-  }
-
-  await smtpTransporter.sendMail({ from: env.smtpFrom, to, subject, text, html });
-  return { success: true };
-}
+const sendSmtpEmail = sendEmail;
 
 export function sendRegistrationEmail({ to, name, role }) {
   const roleLabel = role === "tailor" ? "tailor partner" : "customer";
@@ -114,11 +125,6 @@ export async function sendOrderTimelineEmail({ to, name, order }) {
     })
     .join("\n");
 
-  if (!smtpTransporter) {
-    console.log(`[SIMULATOR - ORDER TIMELINE] ${to}: ${order.orderNo}\n${timeline}`);
-    return { success: true, simulated: true };
-  }
-
   const currentStageIndex = orderStages.findIndex(([id]) => id === order.status);
   const progressHtml = orderStages
     .map(([id, label], index) => {
@@ -143,7 +149,7 @@ export async function sendOrderTimelineEmail({ to, name, order }) {
   const safeGarmentType = escapeHtml(order.garmentType);
   const safeStatus = escapeHtml(order.status);
 
-  await smtpTransporter.sendMail({
+  await sendEmail({
     from: env.smtpFrom,
     to,
     subject: `Stitching update for order ${order.orderNo}`,
@@ -157,12 +163,7 @@ export async function sendOrderTimelineEmail({ to, name, order }) {
 export async function sendPasswordResetEmail({ to, name, resetUrl }) {
   if (!to) return { success: false, skipped: true };
 
-  if (!smtpTransporter) {
-    console.log(`[SIMULATOR - RESET LINK] ${to}: ${resetUrl}`);
-    return { success: true, simulated: true };
-  }
-
-  await smtpTransporter.sendMail({
+  await sendEmail({
     from: env.smtpFrom,
     to,
     subject: "Reset your SmartTailor password",

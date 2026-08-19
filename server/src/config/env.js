@@ -24,4 +24,6 @@ export const env = {
   smtpPass: process.env.SMTP_PASS || "",
   smtpFrom: process.env.SMTP_FROM || process.env.SMTP_USER || "",
   smtpSecure: process.env.SMTP_SECURE === "true",
+  resendApiKey: process.env.RESEND_API_KEY || "",
+  resendFrom: process.env.RESEND_FROM || "",
 };

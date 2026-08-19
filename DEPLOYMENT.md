@@ -49,6 +49,8 @@ git push -u origin main
    - `SMTP_PASS`: SMTP account password or provider app password
    - `SMTP_FROM`: *(Optional) Sender address; defaults to `SMTP_USER`*
    - `SMTP_SECURE`: `true` for SSL on port `465`; otherwise `false`
+   - `RESEND_API_KEY`: *(Recommended) Resend API key; uses HTTPS and avoids SMTP port restrictions*
+   - `RESEND_FROM`: Verified Resend sender, for example `SmartTailor <onboarding@resend.dev>`
    - SMTP is used for login confirmations and customer stitching timeline updates.
 6. Click **Deploy Web Service**. Render will build and start your server. Copy the generated Web Service URL (e.g., `https://smarttailor-backend.onrender.com`).
 

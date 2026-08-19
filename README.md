@@ -85,9 +85,11 @@ SMTP_USER=
 SMTP_PASS=
 SMTP_FROM= # Optional; defaults to SMTP_USER
 SMTP_SECURE=false # Set true for port 465
+RESEND_API_KEY= # Recommended for Render deployments
+RESEND_FROM= # Verified Resend sender, e.g. SmartTailor <onboarding@resend.dev>
 ```
 
-After a successful login, SmartTailor sends a login confirmation to the user's email address when SMTP is configured. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. Login and status updates still succeed if delivery fails.
+After a successful login, SmartTailor sends a login confirmation to the user's email address. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. Resend HTTPS is preferred when configured; SMTP remains a fallback. Login and status updates still succeed if delivery fails.
 
 ### 4. Database Seeding
 Populate initial mock data (Admin, Tailor Boutique, Customer, and Rate Catalogs):
