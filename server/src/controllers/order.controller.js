@@ -4,6 +4,7 @@ import { Tailor } from "../models/Tailor.js";
 import { User } from "../models/User.js";
 import { Notification } from "../models/Notification.js";
 import { sendSMS, sendWhatsApp } from "../services/messaging.service.js";
+import { sendNewOrderEmail, sendOrderTimelineEmail } from "../services/email.service.js";
 
 function makeOrderNo() {
   return `ST-${Date.now().toString(36).toUpperCase()}`;
@@ -35,6 +36,20 @@ export async function createOrder(req, res, next) {
 
       // WhatsApp/SMS to Tailor User
       const tailorUser = await User.findById(tailor.userId);
+      if (tailorUser?.email) {
+        try {
+          await sendNewOrderEmail({
+            to: tailorUser.email,
+            name: tailorUser.name,
+            customerName: req.user.name,
+            tailorShopName: tailor.shopName,
+            order
+          });
+        } catch (error) {
+          console.error("New order email could not be sent:", error.message);
+        }
+      }
+
       if (tailorUser && tailorUser.phone) {
         const tailorMsg = `Hello ${tailorUser.name}, you have received a new order ${order.orderNo} for stitching a ${order.garmentType} at your boutique "${tailor.shopName}". Please log in to review the order.`;
         sendWhatsApp(tailorUser.phone, tailorMsg);
@@ -112,6 +127,18 @@ export async function updateOrderStatus(req, res, next) {
 
     // WhatsApp/SMS notification to Customer User when Tailor updates status
     const customerUser = await User.findById(order.customerId);
+    if (customerUser?.email) {
+      try {
+        await sendOrderTimelineEmail({
+          to: customerUser.email,
+          name: customerUser.name,
+          order
+        });
+      } catch (error) {
+        console.error("Order timeline email could not be sent:", error.message);
+      }
+    }
+
     if (customerUser && customerUser.phone) {
       const customerMsg = `Hello ${customerUser.name}, your stitching order ${order.orderNo} status is now updated to "${status.toUpperCase()}". ${note ? `Remark: "${note}"` : ""}`;
       sendWhatsApp(customerUser.phone, customerMsg);

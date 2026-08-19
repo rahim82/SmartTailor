@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { User } from "../models/User.js";
 import { signAccessToken } from "../utils/tokens.js";
-import { sendPasswordResetEmail } from "../services/email.service.js";
+import { sendLoginSuccessEmail, sendPasswordResetEmail, sendRegistrationEmail } from "../services/email.service.js";
 
 export async function register(req, res, next) {
   try {
@@ -17,6 +17,12 @@ export async function register(req, res, next) {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await User.create({ name, phone, email, passwordHash, role });
     const token = signAccessToken(user);
+
+    try {
+      await sendRegistrationEmail({ to: user.email, name: user.name, role: user.role });
+    } catch (error) {
+      console.error("Registration email could not be sent:", error.message);
+    }
 
     const io = req.app.get("io");
     if (io) io.emit("admin:refresh");
@@ -45,6 +51,12 @@ export async function login(req, res, next) {
     }
 
     const token = signAccessToken(user);
+    try {
+      await sendLoginSuccessEmail({ to: user.email, name: user.name });
+    } catch (error) {
+      console.error("Login success email could not be sent:", error.message);
+    }
+
     res.json({
       token,
       user: { id: user._id, name: user.name, phone: user.phone, email: user.email, role: user.role }
@@ -66,8 +78,8 @@ export async function forgotPassword(req, res, next) {
 
     const cleanEmail = email.trim().toLowerCase();
     const user = await User.findOne({ email: cleanEmail });
-    const message = "If an account exists for this email, a password reset link has been sent.";
-    if (!user) return res.json({ message });
+    
+    if (!user) return res.json({ message:"No account found for this email." });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.resetPasswordTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
@@ -84,7 +96,7 @@ export async function forgotPassword(req, res, next) {
       throw error;
     }
 
-    res.json({ message });
+    res.json({ message: "Password reset email sent. Please check your inbox." });
   } catch (error) {
     next(error);
   }

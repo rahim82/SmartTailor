@@ -36,7 +36,14 @@ export default function AuthPage() {
         mode === "login"
           ? await login({ identifier: form.identifier, password: form.password })
           : await register({ name: form.name, phone: form.phone, email: form.email, password: form.password, role });
-      const dest = location.state?.from || dashboardPath(user.role);
+      const requestedPath = location.state?.from;
+      const allowedPaths = {
+        customer: "/customer",
+        tailor: "/tailor",
+        admin: "/admin"
+      };
+      const roleDashboard = allowedPaths[user.role] || "/customer";
+      const dest = requestedPath === roleDashboard ? requestedPath : dashboardPath(user.role);
       navigate(dest, { 
         replace: true, 
         state: { selectedTailorId: location.state?.selectedTailorId } 
@@ -49,14 +56,14 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="mx-auto grid min-h-[calc(100vh-66px)] max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+    <main className="auth-page mx-auto grid min-h-[calc(100vh-66px)] max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
       <section className="flex flex-col justify-center">
         <div className="grid h-12 w-12 place-items-center rounded-md bg-ink text-white">
           <Scissors />
         </div>
         <h1 className="mt-5 text-4xl font-semibold">Connect SmartTailor to real accounts</h1>
         
-        <div className="mt-6 rounded-md border border-black/10 bg-white p-4 text-sm shadow-soft">
+        <div className="mt-6 rounded-md border border-white/70 bg-white/45 p-4 text-sm shadow-soft backdrop-blur-md">
           <p className="font-semibold">Demo login</p>
           <div className="mt-3 space-y-2">
             {demoAccounts.map(({ label, email, password }) => (
@@ -76,7 +83,7 @@ export default function AuthPage() {
         </div>
       </section>
 
-      <section className="self-center rounded-md border border-black/10 bg-white p-5 shadow-soft">
+      <section className="self-center rounded-md border border-white/70 bg-white/50 p-5 shadow-soft backdrop-blur-md">
         <div className="mb-5 grid grid-cols-2 rounded-md bg-black/[0.04] p-1">
           {["login", "register"].map((item) => (
             <button
@@ -97,7 +104,7 @@ export default function AuthPage() {
                 <select 
                   value={role} 
                   onChange={(event) => setRole(event.target.value)} 
-                  className="mt-1.5 w-full rounded-lg border border-black/15 bg-black/[0.01] px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
+                  className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
                 >
                   <option value="customer">Customer</option>
                   <option value="tailor">Tailor</option>
@@ -119,7 +126,7 @@ export default function AuthPage() {
                 value={form.password}
                 required
                 onChange={(event) => update("password", event.target.value)}
-                className="w-full rounded-lg border border-black/15 bg-black/[0.01] pl-4.5 pr-12 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
+                className="w-full rounded-lg border border-black/15 bg-white/45 pl-4.5 pr-12 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
               />
               <button
                 type="button"
@@ -158,7 +165,7 @@ function Input({ label, value, onChange, type = "text", required = false }) {
         value={value}
         required={required}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1.5 w-full rounded-lg border border-black/15 bg-black/[0.01] px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white transition-all duration-200"
+        className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
       />
     </div>
   );

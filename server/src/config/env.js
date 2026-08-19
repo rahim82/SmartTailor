@@ -18,7 +18,10 @@ export const env = {
   twilioSid: process.env.TWILIO_ACCOUNT_SID || "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
   twilioFrom: process.env.TWILIO_PHONE_NUMBER || "",
-  brevoApiKey: process.env.BREVO_API_KEY || "",
-  brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || "",
-  brevoSenderName: process.env.BREVO_SENDER_NAME || "SmartTailor",
+  smtpHost: process.env.SMTP_HOST || "",
+  smtpPort: Number(process.env.SMTP_PORT || 587),
+  smtpUser: process.env.SMTP_USER || "",
+  smtpPass: process.env.SMTP_PASS || "",
+  smtpFrom: process.env.SMTP_FROM || process.env.SMTP_USER || "",
+  smtpSecure: process.env.SMTP_SECURE === "true",
 };

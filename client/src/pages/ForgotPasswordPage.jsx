@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
     setBusy(true); setError(""); setNotice("");
     try {
       const { data } = await api.post("/auth/forgot-password", { email });
-      setNotice(data.message + " Check your inbox and spam folder.");
+      setNotice(data.message );
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Unable to send the reset link");
     } finally { setBusy(false); }
@@ -43,8 +43,8 @@ export default function ForgotPasswordPage() {
 
   const isResetting = Boolean(token);
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-66px)] max-w-xl items-center px-4 py-10 sm:px-6">
-      <section className="w-full rounded-xl border border-black/10 bg-white p-6 shadow-soft sm:p-8">
+    <main className="auth-page mx-auto flex min-h-[calc(100vh-66px)] max-w-xl items-center px-4 py-10 sm:px-6">
+      <section className="w-full rounded-xl border border-white/70 bg-white/50 p-6 shadow-soft backdrop-blur-md sm:p-8">
         <Link to="/auth" className="inline-flex items-center gap-2 text-sm font-medium text-ink/65 hover:text-stitch"><ArrowLeft size={16} /> Back to login</Link>
         <div className="mt-6 grid h-12 w-12 place-items-center rounded-md bg-ink text-white"><Scissors /></div>
         <h1 className="mt-5 text-3xl font-semibold">{isResetting ? "Choose a new password" : "Forgot your password?"}</h1>
@@ -65,5 +65,5 @@ export default function ForgotPasswordPage() {
 }
 
 function Field({ label, type = "text", value, onChange, minLength, required }) {
-  return <div><label className="text-xs font-semibold uppercase tracking-wider text-ink/75">{label}</label><input type={type} value={value} minLength={minLength} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1.5 w-full rounded-lg border border-black/15 bg-black/[0.01] px-4.5 py-3 text-sm outline-none" /></div>;
+  return <div><label className="text-xs font-semibold uppercase tracking-wider text-ink/75">{label}</label><input type={type} value={value} minLength={minLength} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85" /></div>;
 }

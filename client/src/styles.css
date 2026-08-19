@@ -17,6 +17,53 @@ body {
     radial-gradient(at 100% 0%, rgba(199, 107, 42, 0.04) 0px, transparent 50%);
 }
 
+/* A coloured backdrop makes the translucent authentication cards visibly glass-like. */
+.auth-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 2rem;
+  background-color: rgba(255, 255, 255, 0.18);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.26) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.26) 1px, transparent 1px),
+    radial-gradient(circle at 78% 22%, rgba(15, 118, 110, 0.22), transparent 30%),
+    radial-gradient(circle at 18% 82%, rgba(199, 107, 42, 0.2), transparent 28%),
+    linear-gradient(135deg, rgba(236, 253, 245, 0.72), rgba(255, 247, 237, 0.58));
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+}
+
+.auth-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-page::before,
+.auth-page::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.auth-page::before {
+  width: 24rem;
+  height: 24rem;
+  top: -8rem;
+  right: -7rem;
+  background: rgba(15, 118, 110, 0.3);
+}
+
+.auth-page::after {
+  width: 20rem;
+  height: 20rem;
+  bottom: -9rem;
+  left: -6rem;
+  background: rgba(199, 107, 42, 0.28);
+}
+
 @keyframes float-slow {
   0%, 100% {
     transform: translateY(0px) scale(1);

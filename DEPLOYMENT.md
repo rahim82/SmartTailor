@@ -43,6 +43,13 @@ git push -u origin main
    - `TWILIO_ACCOUNT_SID`: *(Optional) Twilio Account SID*
    - `TWILIO_AUTH_TOKEN`: *(Optional) Twilio Auth Token*
    - `TWILIO_PHONE_NUMBER`: *(Optional) Twilio Phone Number*
+   - `SMTP_HOST`: *(Optional) SMTP server hostname for login success emails*
+   - `SMTP_PORT`: `587` for STARTTLS or `465` for SSL
+   - `SMTP_USER`: SMTP account username
+   - `SMTP_PASS`: SMTP account password or provider app password
+   - `SMTP_FROM`: *(Optional) Sender address; defaults to `SMTP_USER`*
+   - `SMTP_SECURE`: `true` for SSL on port `465`; otherwise `false`
+   - SMTP is used for login confirmations and customer stitching timeline updates.
 6. Click **Deploy Web Service**. Render will build and start your server. Copy the generated Web Service URL (e.g., `https://smarttailor-backend.onrender.com`).
 
 ---

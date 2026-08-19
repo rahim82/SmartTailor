@@ -32,7 +32,7 @@ SmartTailor is a premium MERN stack SaaS marketplace connecting local boutique t
 ## 🛠️ Technology Stack
 
 - **Frontend**: React (Vite), Tailwind CSS, Lucide React, React Router.
-- **Backend**: Node.js, Express.js, JWT Authentication, Twilio REST API, Cloudinary SDK.
+- **Backend**: Node.js, Express.js, JWT Authentication, Nodemailer SMTP, Twilio REST API, Cloudinary SDK.
 - **Database**: MongoDB (Atlas) / Mongoose ODM.
 
 ---
@@ -79,7 +79,15 @@ CLOUDINARY_URL=cloudinary://<key>:<secret>@<cloud_name> # (Optional, falls back 
 TWILIO_ACCOUNT_SID= # (Optional, falls back to console log logs)
 TWILIO_AUTH_TOKEN=
 TWILIO_PHONE_NUMBER=
+SMTP_HOST= # (Optional, enables login success emails)
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM= # Optional; defaults to SMTP_USER
+SMTP_SECURE=false # Set true for port 465
 ```
+
+After a successful login, SmartTailor sends a login confirmation to the user's email address when SMTP is configured. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. Login and status updates still succeed if delivery fails.
 
 ### 4. Database Seeding
 Populate initial mock data (Admin, Tailor Boutique, Customer, and Rate Catalogs):

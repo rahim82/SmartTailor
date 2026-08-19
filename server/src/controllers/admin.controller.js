@@ -2,6 +2,7 @@ import { User } from "../models/User.js";
 import { Tailor } from "../models/Tailor.js";
 import { Order } from "../models/Order.js";
 import { Payment } from "../models/Payment.js";
+import { sendTailorStatusEmail } from "../services/email.service.js";
 
 export async function dashboard(_req, res, next) {
   try {
@@ -53,6 +54,22 @@ export async function verifyTailor(req, res, next) {
       { verificationStatus: req.body.verificationStatus },
       { new: true }
     );
+
+    if (!tailor) return res.status(404).json({ message: "Tailor not found" });
+
+    const tailorUser = await User.findById(tailor.userId);
+    if (tailorUser?.email) {
+      try {
+        await sendTailorStatusEmail({
+          to: tailorUser.email,
+          name: tailorUser.name,
+          shopName: tailor.shopName,
+          status: tailor.verificationStatus
+        });
+      } catch (error) {
+        console.error("Tailor status email could not be sent:", error.message);
+      }
+    }
 
     const io = req.app.get("io");
     if (io) io.emit("tailor:updated", tailor);
