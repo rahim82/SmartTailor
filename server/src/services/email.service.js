@@ -6,6 +6,7 @@ const smtpTransporter = env.smtpHost && env.smtpUser && env.smtpPass
       host: env.smtpHost,
       port: env.smtpPort,
       secure: env.smtpSecure,
+      family: 4,
       auth: { user: env.smtpUser, pass: env.smtpPass },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
