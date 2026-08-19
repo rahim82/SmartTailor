@@ -22,25 +22,31 @@ function escapeHtml(value) {
 async function sendEmail({ to, subject, text, html, simulatorLabel }) {
   if (!to) return { success: false, skipped: true };
 
-  if (!env.resendApiKey || !env.resendFrom) {
-    throw new Error("Resend email configuration is missing");
+  if (!env.brevoApiKey || !env.brevoSenderEmail) {
+    throw new Error("Brevo email configuration is missing");
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${env.resendApiKey}`,
+      "api-key": env.brevoApiKey,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ from: env.resendFrom, to: [to], subject, text, html })
+    body: JSON.stringify({
+      sender: { email: env.brevoSenderEmail, name: env.brevoSenderName },
+      to: [{ email: to }],
+      subject,
+      textContent: text,
+      htmlContent: html
+    })
   });
 
   if (!response.ok) {
     const result = await response.json().catch(() => ({}));
-    throw new Error(result.message || "Resend could not send the email");
+    throw new Error(result.message || "Brevo could not send the email");
   }
 
-  return { success: true, provider: "resend" };
+  return { success: true, provider: "brevo" };
 }
 
 export async function sendLoginSuccessEmail({ to, name }) {
@@ -53,12 +59,12 @@ export async function sendLoginSuccessEmail({ to, name }) {
   });
 }
 
-const sendResendEmail = sendEmail;
+const sendBrevoEmail = sendEmail;
 
 export function sendRegistrationEmail({ to, name, role }) {
   const roleLabel = role === "tailor" ? "tailor partner" : "customer";
   const safeName = escapeHtml(name || "there");
-  return sendResendEmail({
+  return sendBrevoEmail({
     to,
     subject: "Welcome to SmartTailor",
     text: `Hello ${name || "there"},\n\nYour SmartTailor ${roleLabel} account has been created successfully. You can now log in and use SmartTailor.`,
@@ -73,7 +79,7 @@ export function sendNewOrderEmail({ to, name, customerName, tailorShopName, orde
   const safeShopName = escapeHtml(tailorShopName || "your boutique");
   const safeOrderNo = escapeHtml(order.orderNo);
   const safeGarmentType = escapeHtml(order.garmentType);
-  return sendResendEmail({
+  return sendBrevoEmail({
     to,
     subject: `New stitching order ${order.orderNo}`,
     text: `Hello ${name || "there"},\n\n${customerName || "A customer"} placed stitching order ${order.orderNo} for a ${order.garmentType} at ${tailorShopName || "your boutique"}. Please log in to review the order.`,
@@ -86,7 +92,7 @@ export function sendTailorStatusEmail({ to, name, shopName, status }) {
   const safeName = escapeHtml(name || "there");
   const safeShopName = escapeHtml(shopName || "your shop");
   const safeStatus = escapeHtml(status);
-  return sendResendEmail({
+  return sendBrevoEmail({
     to,
     subject: `Shop verification update: ${status}`,
     text: `Hello ${name || "there"},\n\nThe status of ${shopName || "your shop"} has been updated by SmartTailor admin to ${status}.`,
@@ -130,7 +136,6 @@ export async function sendOrderTimelineEmail({ to, name, order }) {
   const safeStatus = escapeHtml(order.status);
 
   await sendEmail({
-    from: env.smtpFrom,
     to,
     subject: `Stitching update for order ${order.orderNo}`,
     text: `Hello ${name || "there"},\n\nYour stitching order ${order.orderNo} (${order.garmentType}) is now ${order.status}.\n\nTimeline:\n${timeline}`,
@@ -144,7 +149,6 @@ export async function sendPasswordResetEmail({ to, name, resetUrl }) {
   if (!to) return { success: false, skipped: true };
 
   await sendEmail({
-    from: env.smtpFrom,
     to,
     subject: "Reset your SmartTailor password",
     text: `Hello ${name || "there"},\n\nUse this link to reset your SmartTailor password. It expires in 30 minutes:\n${resetUrl}\n\nIf you did not request this, you can safely ignore this email.`,

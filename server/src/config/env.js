@@ -18,6 +18,7 @@ export const env = {
   twilioSid: process.env.TWILIO_ACCOUNT_SID || "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
   twilioFrom: process.env.TWILIO_PHONE_NUMBER || "",
-  resendApiKey: process.env.RESEND_API_KEY || "",
-  resendFrom: process.env.RESEND_FROM || "",
+  brevoApiKey: process.env.BREVO_API_KEY || "",
+  brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || "",
+  brevoSenderName: process.env.BREVO_SENDER_NAME || "SmartTailor",
 };

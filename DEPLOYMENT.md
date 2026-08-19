@@ -43,9 +43,10 @@ git push -u origin main
    - `TWILIO_ACCOUNT_SID`: *(Optional) Twilio Account SID*
    - `TWILIO_AUTH_TOKEN`: *(Optional) Twilio Auth Token*
    - `TWILIO_PHONE_NUMBER`: *(Optional) Twilio Phone Number*
-   - `RESEND_API_KEY`: Resend API key; required for email delivery
-   - `RESEND_FROM`: Verified Resend sender, for example `SmartTailor <onboarding@resend.dev>`
-   - Resend HTTPS is used for login, registration, password reset, order, shop status, and stitching timeline emails.
+   - `BREVO_API_KEY`: Brevo API key; required for email delivery
+   - `BREVO_SENDER_EMAIL`: Verified Brevo sender email
+   - `BREVO_SENDER_NAME`: `SmartTailor`
+   - Brevo HTTPS is used for login, registration, password reset, order, shop status, and stitching timeline emails.
 6. Click **Deploy Web Service**. Render will build and start your server. Copy the generated Web Service URL (e.g., `https://smarttailor-backend.onrender.com`).
 
 ---
