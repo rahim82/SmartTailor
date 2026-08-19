@@ -79,17 +79,11 @@ CLOUDINARY_URL=cloudinary://<key>:<secret>@<cloud_name> # (Optional, falls back 
 TWILIO_ACCOUNT_SID= # (Optional, falls back to console log logs)
 TWILIO_AUTH_TOKEN=
 TWILIO_PHONE_NUMBER=
-SMTP_HOST= # (Optional, enables login success emails)
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM= # Optional; defaults to SMTP_USER
-SMTP_SECURE=false # Set true for port 465
-RESEND_API_KEY= # Recommended for Render deployments
+RESEND_API_KEY= # Required for email delivery
 RESEND_FROM= # Verified Resend sender, e.g. SmartTailor <onboarding@resend.dev>
 ```
 
-After a successful login, SmartTailor sends a login confirmation to the user's email address. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. Resend HTTPS is preferred when configured; SMTP remains a fallback. Login and status updates still succeed if delivery fails.
+After a successful login, SmartTailor sends a login confirmation to the user's email address. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. All email delivery uses the Resend HTTPS API.
 
 ### 4. Database Seeding
 Populate initial mock data (Admin, Tailor Boutique, Customer, and Rate Catalogs):

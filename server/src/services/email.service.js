@@ -1,18 +1,4 @@
 import { env } from "../config/env.js";
-import nodemailer from "nodemailer";
-
-const smtpTransporter = env.smtpHost && env.smtpUser && env.smtpPass
-  ? nodemailer.createTransport({
-      host: env.smtpHost,
-      port: env.smtpPort,
-      secure: env.smtpSecure,
-      family: 4,
-      auth: { user: env.smtpUser, pass: env.smtpPass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-    })
-  : null;
 
 const orderStages = [
   ["placed", "Placed"],
@@ -36,31 +22,25 @@ function escapeHtml(value) {
 async function sendEmail({ to, subject, text, html, simulatorLabel }) {
   if (!to) return { success: false, skipped: true };
 
-  if (env.resendApiKey && env.resendFrom) {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.resendApiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ from: env.resendFrom, to: [to], subject, text, html })
-    });
-
-    if (!response.ok) {
-      const result = await response.json().catch(() => ({}));
-      throw new Error(result.message || "Resend could not send the email");
-    }
-
-    return { success: true, provider: "resend" };
+  if (!env.resendApiKey || !env.resendFrom) {
+    throw new Error("Resend email configuration is missing");
   }
 
-  if (smtpTransporter) {
-    await smtpTransporter.sendMail({ from: env.smtpFrom, to, subject, text, html });
-    return { success: true, provider: "smtp" };
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.resendApiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ from: env.resendFrom, to: [to], subject, text, html })
+  });
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.message || "Resend could not send the email");
   }
 
-  console.log(`[SIMULATOR - ${simulatorLabel}] ${to}`);
-  return { success: true, simulated: true };
+  return { success: true, provider: "resend" };
 }
 
 export async function sendLoginSuccessEmail({ to, name }) {
@@ -73,12 +53,12 @@ export async function sendLoginSuccessEmail({ to, name }) {
   });
 }
 
-const sendSmtpEmail = sendEmail;
+const sendResendEmail = sendEmail;
 
 export function sendRegistrationEmail({ to, name, role }) {
   const roleLabel = role === "tailor" ? "tailor partner" : "customer";
   const safeName = escapeHtml(name || "there");
-  return sendSmtpEmail({
+  return sendResendEmail({
     to,
     subject: "Welcome to SmartTailor",
     text: `Hello ${name || "there"},\n\nYour SmartTailor ${roleLabel} account has been created successfully. You can now log in and use SmartTailor.`,
@@ -93,7 +73,7 @@ export function sendNewOrderEmail({ to, name, customerName, tailorShopName, orde
   const safeShopName = escapeHtml(tailorShopName || "your boutique");
   const safeOrderNo = escapeHtml(order.orderNo);
   const safeGarmentType = escapeHtml(order.garmentType);
-  return sendSmtpEmail({
+  return sendResendEmail({
     to,
     subject: `New stitching order ${order.orderNo}`,
     text: `Hello ${name || "there"},\n\n${customerName || "A customer"} placed stitching order ${order.orderNo} for a ${order.garmentType} at ${tailorShopName || "your boutique"}. Please log in to review the order.`,
@@ -106,7 +86,7 @@ export function sendTailorStatusEmail({ to, name, shopName, status }) {
   const safeName = escapeHtml(name || "there");
   const safeShopName = escapeHtml(shopName || "your shop");
   const safeStatus = escapeHtml(status);
-  return sendSmtpEmail({
+  return sendResendEmail({
     to,
     subject: `Shop verification update: ${status}`,
     text: `Hello ${name || "there"},\n\nThe status of ${shopName || "your shop"} has been updated by SmartTailor admin to ${status}.`,
