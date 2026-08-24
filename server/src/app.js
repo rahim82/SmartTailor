@@ -18,7 +18,9 @@ import uploadRoutes from "./routes/upload.routes.js";
 
 export const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+}));
 app.use(compression());
 app.use(cors({ origin: env.clientUrl, credentials: true }));
 app.use(express.json({ limit: "2mb" }));
