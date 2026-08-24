@@ -116,7 +116,14 @@ export async function googleLogin(req, res, next) {
       user: { id: user._id, name: user.name, phone: user.phone, email: user.email, role: user.role }
     });
   } catch (error) {
-    if (error.message?.includes("Wrong number of segments") || error.message?.includes("Invalid token")) {
+    console.error("Google authentication failed:", error);
+    if (
+      error.message?.includes("Wrong number of segments") ||
+      error.message?.includes("Invalid token") ||
+      error.message?.includes("Token used too late") ||
+      error.message?.includes("Token used too early") ||
+      error.message?.includes("Invalid audience")
+    ) {
       return res.status(401).json({ message: "Invalid Google credential" });
     }
     next(error);
