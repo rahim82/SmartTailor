@@ -38,6 +38,14 @@ export function AuthProvider({ children }) {
     return data.user;
   }
 
+  async function googleLogin(credential) {
+    const { data } = await api.post("/auth/google", { credential });
+    localStorage.setItem("smarttailor_token", data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }
+
   async function register(payload) {
     const { data } = await api.post("/auth/register", payload);
     localStorage.setItem("smarttailor_token", data.token);
@@ -52,7 +60,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  const value = useMemo(() => ({ user, token, loading, login, register, logout }), [user, token, loading]);
+  const value = useMemo(() => ({ user, token, loading, login, googleLogin, register, logout }), [user, token, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

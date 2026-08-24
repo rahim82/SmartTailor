@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Scissors, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -17,11 +17,55 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, register } = useAuth();
+  const { login, googleLogin, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const googleButtonRef = useRef(null);
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const [notice] = useState(location.state?.resetMessage || "");
+
+  useEffect(() => {
+    if (mode !== "login" || !googleClientId || !googleButtonRef.current) return;
+
+    function renderGoogleButton() {
+      if (!window.google?.accounts?.id || !googleButtonRef.current) return;
+      googleButtonRef.current.innerHTML = "";
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async ({ credential }) => {
+          setError("");
+          setBusy(true);
+          try {
+            const user = await googleLogin(credential);
+            navigate(dashboardPath(user.role), { replace: true });
+          } catch (apiError) {
+            setError(apiError.response?.data?.message || "Google sign-in failed");
+          } finally {
+            setBusy(false);
+          }
+        }
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: 400,
+        text: "continue_with"
+      });
+    }
+
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = renderGoogleButton;
+    document.head.appendChild(script);
+  }, [googleClientId, googleLogin, mode, navigate]);
   function update(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -145,6 +189,16 @@ export default function AuthPage() {
           >
             {busy ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
           </button>
+          {mode === "login" && googleClientId && (
+            <>
+              <div className="flex items-center gap-3 text-xs text-ink/45">
+                <span className="h-px flex-1 bg-black/10" />
+                <span>or continue with</span>
+                <span className="h-px flex-1 bg-black/10" />
+              </div>
+              <div ref={googleButtonRef} className="flex min-h-10 justify-center" />
+            </>
+          )}
           {mode === "login" && (
             <button type="button" onClick={() => navigate("/forgot-password")} className="w-full text-sm font-medium text-stitch hover:underline">
               Forgot password?

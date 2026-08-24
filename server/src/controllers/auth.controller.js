@@ -1,8 +1,11 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import { User } from "../models/User.js";
 import { signAccessToken } from "../utils/tokens.js";
 import { sendLoginSuccessEmail, sendPasswordResetEmail, sendRegistrationEmail } from "../services/email.service.js";
+
+const googleClient = new OAuth2Client();
 
 export async function register(req, res, next) {
   try {
@@ -55,6 +58,57 @@ export async function login(req, res, next) {
       await sendLoginSuccessEmail({ to: user.email, name: user.name });
     } catch (error) {
       console.error("Login success email could not be sent:", error.message);
+    }
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, phone: user.phone, email: user.email, role: user.role }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function googleLogin(req, res, next) {
+  try {
+    const { credential } = req.body;
+    if (!credential || !env.googleClientId) {
+      return res.status(400).json({ message: "Google sign-in is not configured" });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: env.googleClientId
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      return res.status(401).json({ message: "Google account could not be verified" });
+    }
+
+    let user = await User.findOne({ email: payload.email.toLowerCase() });
+    const isNewUser = !user;
+
+    if (!user) {
+      user = await User.create({
+        name: payload.name || "Google User",
+        phone: `google-${payload.sub}`,
+        email: payload.email,
+        passwordHash: await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 12),
+        role: "customer",
+        avatarUrl: payload.picture || undefined
+      });
+    }
+
+    const token = signAccessToken(user);
+    try {
+      if (isNewUser) {
+        await sendRegistrationEmail({ to: user.email, name: user.name, role: user.role });
+      } else {
+        await sendLoginSuccessEmail({ to: user.email, name: user.name });
+      }
+    } catch (error) {
+      console.error("Google auth email could not be sent:", error.message);
     }
 
     res.json({

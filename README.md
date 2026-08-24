@@ -82,6 +82,7 @@ TWILIO_PHONE_NUMBER=
 BREVO_API_KEY= # Required for email delivery
 BREVO_SENDER_EMAIL= # Verified Brevo sender email
 BREVO_SENDER_NAME=SmartTailor
+GOOGLE_CLIENT_ID= # Backend Google OAuth client ID
 ```
 
 After a successful login, SmartTailor sends a login confirmation to the user's email address. When a tailor updates an order status, the customer receives an email containing the latest status and complete stitching timeline. All email delivery uses the Brevo HTTPS API.
@@ -99,6 +100,8 @@ npm run dev
 ```
 - **Frontend App**: `http://localhost:5173`
 - **Backend APIs**: `http://localhost:5000`
+
+For Google sign-in, create a Web application OAuth client in Google Cloud Console and add `VITE_GOOGLE_CLIENT_ID` to the client environment and `GOOGLE_CLIENT_ID` to the server environment. Add the local and deployed frontend origins to the OAuth client's authorized JavaScript origins.
 
 ---
 

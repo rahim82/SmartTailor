@@ -46,6 +46,7 @@ git push -u origin main
    - `BREVO_API_KEY`: Brevo API key; required for email delivery
    - `BREVO_SENDER_EMAIL`: Verified Brevo sender email
    - `BREVO_SENDER_NAME`: `SmartTailor`
+   - `GOOGLE_CLIENT_ID`: Google OAuth Web client ID
    - Brevo HTTPS is used for login, registration, password reset, order, shop status, and stitching timeline emails.
 6. Click **Deploy Web Service**. Render will build and start your server. Copy the generated Web Service URL (e.g., `https://smarttailor-backend.onrender.com`).
 
@@ -64,6 +65,7 @@ git push -u origin main
 5. Expand **Environment Variables** and add:
    - `VITE_API_URL`: `https://your-backend-app.onrender.com/api` (The URL copied from your Render backend deployment, appended with `/api`)
    - `VITE_SOCKET_URL`: `https://your-backend-app.onrender.com` (The URL copied from your Render backend deployment without trailing slash)
+   - `VITE_GOOGLE_CLIENT_ID`: Same Google OAuth Web client ID used by the backend
 6. Click **Deploy**. Vercel will build and host your frontend. Copy your live Vercel URL (e.g., `https://your-frontend-app.vercel.app`).
 
 ---
