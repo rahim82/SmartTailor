@@ -78,7 +78,7 @@ export default function AuthPage() {
     try {
       const user =
         mode === "login"
-          ? await login({ identifier: form.identifier, password: form.password })
+          ? await login({ identifier: form.identifier, password: form.password, role })
           : await register({ name: form.name, phone: form.phone, email: form.email, password: form.password, role });
       const requestedPath = location.state?.from;
       const allowedPaths = {
@@ -132,7 +132,10 @@ export default function AuthPage() {
           {["login", "register"].map((item) => (
             <button
               key={item}
-              onClick={() => setMode(item)}
+              onClick={() => {
+                setMode(item);
+                if (item === "register" && role === "admin") setRole("customer");
+              }}
               className={`rounded px-4 py-2 text-sm font-medium capitalize ${mode === item ? "bg-ink text-white" : ""}`}
             >
               {item}
@@ -141,19 +144,20 @@ export default function AuthPage() {
         </div>
 
         <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Account type</label>
+            <select
+              value={role}
+              onChange={(event) => setRole(event.target.value)}
+              className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
+            >
+              <option value="customer">Customer</option>
+              <option value="tailor">Tailor</option>
+              {mode === "login" && <option value="admin">Admin</option>}
+            </select>
+          </div>
           {mode === "register" && (
             <>
-              <div>
-                <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Role</label>
-                <select 
-                  value={role} 
-                  onChange={(event) => setRole(event.target.value)} 
-                  className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
-                >
-                  <option value="customer">Customer</option>
-                  <option value="tailor">Tailor</option>
-                </select>
-              </div>
               <Input label="Name" value={form.name} onChange={(value) => update("name", value)} required />
               <Input label="Phone" value={form.phone} onChange={(value) => update("phone", value)} required />
               <Input label="Email" type="email" value={form.email} onChange={(value) => update("email", value)} />

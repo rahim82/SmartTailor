@@ -43,6 +43,7 @@ export async function register(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { identifier, password } = req.body;
+    const requestedRole = ["customer", "tailor", "admin"].includes(req.body.role) ? req.body.role : null;
     const cleanIdentifier = typeof identifier === "string" ? identifier.trim() : identifier;
     const emailIdentifier = typeof cleanIdentifier === "string" ? cleanIdentifier.toLowerCase() : cleanIdentifier;
 
@@ -52,6 +53,9 @@ export async function login(req, res, next) {
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+    if (requestedRole && user.role !== requestedRole) {
+      return res.status(403).json({ message: `This account is registered as ${user.role}` });
     }
 
     const token = signAccessToken(user);
@@ -73,7 +77,7 @@ export async function login(req, res, next) {
 export async function googleLogin(req, res, next) {
   try {
     const { credential } = req.body;
-    const requestedRole = req.body.role === "tailor" ? "tailor" : "customer";
+    const requestedRole = ["customer", "tailor", "admin"].includes(req.body.role) ? req.body.role : "customer";
     if (!credential || !env.googleClientId) {
       return res.status(400).json({ message: "Google sign-in is not configured" });
     }
@@ -91,7 +95,14 @@ export async function googleLogin(req, res, next) {
     let user = await User.findOne({ email: payload.email.toLowerCase() });
     const isNewUser = !user;
 
+    if (user && user.role !== requestedRole) {
+      return res.status(403).json({ message: `This Google account is registered as ${user.role}` });
+    }
+
     if (!user) {
+      if (requestedRole === "admin") {
+        return res.status(403).json({ message: "Admin accounts must be created by an administrator" });
+      }
       user = await User.create({
         name: payload.name || "Google User",
         phone: `google-${payload.sub}`,
