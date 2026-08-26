@@ -38,8 +38,8 @@ export function AuthProvider({ children }) {
     return data.user;
   }
 
-  async function googleLogin(credential) {
-    const { data } = await api.post("/auth/google", { credential });
+  async function googleLogin(credential, role = "customer") {
+    const { data } = await api.post("/auth/google", { credential, role });
     localStorage.setItem("smarttailor_token", data.token);
     setToken(data.token);
     setUser(data.user);

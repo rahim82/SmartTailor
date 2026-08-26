@@ -26,7 +26,7 @@ export default function AuthPage() {
   const [notice] = useState(location.state?.resetMessage || "");
 
   useEffect(() => {
-    if (mode !== "login" || !googleClientId || !googleButtonRef.current) return;
+    if (!googleClientId || !googleButtonRef.current) return;
 
     function renderGoogleButton() {
       if (!window.google?.accounts?.id || !googleButtonRef.current) return;
@@ -37,7 +37,7 @@ export default function AuthPage() {
           setError("");
           setBusy(true);
           try {
-            const user = await googleLogin(credential);
+            const user = await googleLogin(credential, role);
             navigate(dashboardPath(user.role), { replace: true });
           } catch (apiError) {
             setError(apiError.response?.data?.message || "Google sign-in failed");
@@ -65,7 +65,7 @@ export default function AuthPage() {
     script.defer = true;
     script.onload = renderGoogleButton;
     document.head.appendChild(script);
-  }, [googleClientId, googleLogin, mode, navigate]);
+  }, [googleClientId, googleLogin, mode, navigate, role]);
   function update(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -189,7 +189,7 @@ export default function AuthPage() {
           >
             {busy ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
           </button>
-          {mode === "login" && googleClientId && (
+          {googleClientId && (
             <>
               <div className="flex items-center gap-3 text-xs text-ink/45">
                 <span className="h-px flex-1 bg-black/10" />

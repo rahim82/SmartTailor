@@ -73,6 +73,7 @@ export async function login(req, res, next) {
 export async function googleLogin(req, res, next) {
   try {
     const { credential } = req.body;
+    const requestedRole = req.body.role === "tailor" ? "tailor" : "customer";
     if (!credential || !env.googleClientId) {
       return res.status(400).json({ message: "Google sign-in is not configured" });
     }
@@ -96,7 +97,7 @@ export async function googleLogin(req, res, next) {
         phone: `google-${payload.sub}`,
         email: payload.email,
         passwordHash: await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 12),
-        role: "customer",
+        role: requestedRole,
         avatarUrl: payload.picture || undefined
       });
     }
