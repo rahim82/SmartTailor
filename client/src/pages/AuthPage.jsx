@@ -211,8 +211,8 @@ export default function AuthPage() {
               <div ref={googleButtonRef} className="flex min-h-10 w-full justify-center" />
               {googleCredential && (
                 <div className="mt-4 space-y-3 rounded-md border border-stitch/20 bg-white/60 p-4 text-left">
-                  <p className="text-sm font-semibold text-ink">New account found</p>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-ink/75">Choose account type</label>
+                  
+                  <label className="text-xs font-semibold uppercase tracking-wider text-ink/75">Please choose account type</label>
                   <select
                     value={googleRole}
                     onChange={(event) => setGoogleRole(event.target.value)}
