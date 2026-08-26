@@ -144,7 +144,7 @@ export default function AuthPage() {
         </div>
 
         <form onSubmit={submit} className="space-y-4">
-          {mode === "login" && (
+          {mode === "register" && (
             <div>
               <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Account type</label>
               <select
@@ -154,7 +154,6 @@ export default function AuthPage() {
               >
                 <option value="customer">Customer</option>
                 <option value="tailor">Tailor</option>
-                <option value="admin">Admin</option>
               </select>
             </div>
           )}
@@ -195,7 +194,7 @@ export default function AuthPage() {
           >
             {busy ? "Please wait..." : mode === "login" ? "Login" : "Create account"}
           </button>
-          {googleClientId && (
+          {mode === "login" && googleClientId && (
             <>
               <div className="flex items-center gap-3 text-xs text-ink/45">
                 <span className="h-px flex-1 bg-black/10" />
