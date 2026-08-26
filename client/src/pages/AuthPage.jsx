@@ -100,8 +100,8 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="auth-page mx-auto grid min-h-[calc(100vh-66px)] max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-      <section className="flex flex-col justify-center">
+    <main className="auth-page mx-auto flex min-h-[calc(100vh-66px)] max-w-2xl flex-col items-center justify-center gap-8 px-4 py-10 sm:px-6 lg:px-8">
+      <section className="flex w-full flex-col items-center justify-center text-center">
         <div className="grid h-12 w-12 place-items-center rounded-md bg-ink text-white">
           <Scissors />
         </div>
@@ -127,7 +127,7 @@ export default function AuthPage() {
         </div>
       </section>
 
-      <section className="self-center rounded-md border border-white/70 bg-white/50 p-5 shadow-soft backdrop-blur-md">
+      <section className="w-full max-w-xl self-center rounded-md border border-white/70 bg-white/50 p-5 shadow-soft backdrop-blur-md">
         <div className="mb-5 grid grid-cols-2 rounded-md bg-black/[0.04] p-1">
           {["login", "register"].map((item) => (
             <button
