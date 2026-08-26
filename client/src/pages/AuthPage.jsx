@@ -49,7 +49,7 @@ export default function AuthPage() {
       window.google.accounts.id.renderButton(googleButtonRef.current, {
         theme: "outline",
         size: "large",
-        width: 400,
+        width: googleButtonRef.current.clientWidth,
         text: "continue_with"
       });
     }
@@ -196,7 +196,7 @@ export default function AuthPage() {
                 <span>or continue with</span>
                 <span className="h-px flex-1 bg-black/10" />
               </div>
-              <div ref={googleButtonRef} className="flex min-h-10 justify-center" />
+              <div ref={googleButtonRef} className="flex min-h-10 w-full justify-center" />
             </>
           )}
           {mode === "login" && (
