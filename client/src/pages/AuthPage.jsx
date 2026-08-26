@@ -144,18 +144,20 @@ export default function AuthPage() {
         </div>
 
         <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Account type</label>
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
-            >
-              <option value="customer">Customer</option>
-              <option value="tailor">Tailor</option>
-              {mode === "login" && <option value="admin">Admin</option>}
-            </select>
-          </div>
+          {mode === "login" && (
+            <div>
+              <label className="text-xs font-semibold text-ink/75 uppercase tracking-wider">Account type</label>
+              <select
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-black/15 bg-white/45 px-4.5 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10 focus:bg-white/85 transition-all duration-200"
+              >
+                <option value="customer">Customer</option>
+                <option value="tailor">Tailor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          )}
           {mode === "register" && (
             <>
               <Input label="Name" value={form.name} onChange={(value) => update("name", value)} required />
