@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import { User } from "../models/User.js";
+import { env } from "../config/env.js";
 import { signAccessToken } from "../utils/tokens.js";
 import { sendLoginSuccessEmail, sendPasswordResetEmail, sendRegistrationEmail } from "../services/email.service.js";
 
