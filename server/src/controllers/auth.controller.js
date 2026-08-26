@@ -77,7 +77,7 @@ export async function login(req, res, next) {
 export async function googleLogin(req, res, next) {
   try {
     const { credential } = req.body;
-    const requestedRole = ["customer", "tailor", "admin"].includes(req.body.role) ? req.body.role : "customer";
+    const requestedRole = ["customer", "tailor", "admin"].includes(req.body.role) ? req.body.role : null;
     if (!credential || !env.googleClientId) {
       return res.status(400).json({ message: "Google sign-in is not configured" });
     }
@@ -95,8 +95,12 @@ export async function googleLogin(req, res, next) {
     let user = await User.findOne({ email: payload.email.toLowerCase() });
     const isNewUser = !user;
 
-    if (user && user.role !== requestedRole) {
+    if (user && requestedRole && user.role !== requestedRole) {
       return res.status(403).json({ message: `This Google account is registered as ${user.role}` });
+    }
+
+    if (!user && !requestedRole) {
+      return res.json({ requiresRole: true });
     }
 
     if (!user) {

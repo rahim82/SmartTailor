@@ -17,6 +17,8 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleCredential, setGoogleCredential] = useState("");
+  const [googleRole, setGoogleRole] = useState("customer");
   const { login, googleLogin, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,8 +39,13 @@ export default function AuthPage() {
           setError("");
           setBusy(true);
           try {
-            const user = await googleLogin(credential, role);
-            navigate(dashboardPath(user.role), { replace: true });
+            const result = await googleLogin(credential);
+            if (result.requiresRole) {
+              setGoogleCredential(credential);
+              setGoogleRole("customer");
+              return;
+            }
+            navigate(dashboardPath(result.role), { replace: true });
           } catch (apiError) {
             setError(apiError.response?.data?.message || "Google sign-in failed");
           } finally {
@@ -202,6 +209,39 @@ export default function AuthPage() {
                 <span className="h-px flex-1 bg-black/10" />
               </div>
               <div ref={googleButtonRef} className="flex min-h-10 w-full justify-center" />
+              {googleCredential && (
+                <div className="mt-4 space-y-3 rounded-md border border-stitch/20 bg-white/60 p-4 text-left">
+                  <p className="text-sm font-semibold text-ink">New account found</p>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-ink/75">Choose account type</label>
+                  <select
+                    value={googleRole}
+                    onChange={(event) => setGoogleRole(event.target.value)}
+                    className="w-full rounded-lg border border-black/15 bg-white/70 px-4 py-3 text-sm outline-none focus:border-stitch focus:ring-4 focus:ring-stitch/10"
+                  >
+                    <option value="customer">Customer</option>
+                    <option value="tailor">Tailor</option>
+                  </select>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setError("");
+                      setBusy(true);
+                      try {
+                        const user = await googleLogin(googleCredential, googleRole);
+                        navigate(dashboardPath(user.role), { replace: true });
+                      } catch (apiError) {
+                        setError(apiError.response?.data?.message || "Google sign-up failed");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="w-full rounded-lg bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:bg-ink/90 disabled:opacity-60"
+                  >
+                    Continue with Google
+                  </button>
+                </div>
+              )}
             </>
           )}
           {mode === "login" && (
