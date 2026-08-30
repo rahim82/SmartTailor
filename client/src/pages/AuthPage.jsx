@@ -20,6 +20,7 @@ export default function AuthPage() {
   const { user, login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [notice] = useState(location.state?.resetMessage || "");
 
   // If already logged in, redirect directly to user role dashboard
   useEffect(() => {
