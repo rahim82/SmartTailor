@@ -22,4 +22,5 @@ export const env = {
   brevoApiKey: process.env.BREVO_API_KEY || "",
   brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || "",
   brevoSenderName: process.env.BREVO_SENDER_NAME || "SmartTailor",
+  googleClientId: process.env.GOOGLE_CLIENT_ID || "",
 };

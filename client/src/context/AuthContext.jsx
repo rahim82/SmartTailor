@@ -38,19 +38,20 @@ export function AuthProvider({ children }) {
     return data.user;
   }
 
-  async function googleLogin(credential, role) {
-    const payload = { credential };
-    if (role) payload.role = role;
-    const { data } = await api.post("/auth/google", payload);
-    if (data.requiresRole) return data;
+  async function register(payload) {
+    const { data } = await api.post("/auth/register", payload);
     localStorage.setItem("smarttailor_token", data.token);
     setToken(data.token);
     setUser(data.user);
     return data.user;
   }
 
-  async function register(payload) {
-    const { data } = await api.post("/auth/register", payload);
+  async function googleLogin(credentialOrPayload, role) {
+    const payload = typeof credentialOrPayload === "object" 
+      ? credentialOrPayload 
+      : { credential: credentialOrPayload, ...(role ? { role } : {}) };
+    const { data } = await api.post("/auth/google", payload);
+    if (data.requiresRole) return data;
     localStorage.setItem("smarttailor_token", data.token);
     setToken(data.token);
     setUser(data.user);
@@ -63,7 +64,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  const value = useMemo(() => ({ user, token, loading, login, googleLogin, register, logout }), [user, token, loading]);
+  const value = useMemo(() => ({ user, token, loading, login, register, googleLogin, logout }), [user, token, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

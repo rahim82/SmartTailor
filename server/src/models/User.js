@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, unique: true, trim: true },
+    phone: { type: String, unique: true, sparse: true, trim: true },
     email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String },
+    googleId: { type: String, unique: true, sparse: true },
     resetPasswordCodeHash: String,
     resetPasswordExpiresAt: Date,
     resetPasswordTokenHash: String,

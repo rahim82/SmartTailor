@@ -51,8 +51,23 @@ export async function upsertProfile(req, res, next) {
 
 export async function tailorDashboard(req, res, next) {
   try {
-    const tailor = await Tailor.findOne({ userId: req.user._id });
-    if (!tailor) return res.status(404).json({ message: "Create tailor profile first" });
+    let tailor = await Tailor.findOne({ userId: req.user._id });
+    if (!tailor) {
+      tailor = await Tailor.create({
+        userId: req.user._id,
+        shopName: `${req.user.name}'s Boutique`,
+        description: "Specialist in custom stitching, alterations, and design.",
+        services: [
+          { name: "Blouse", price: 500 },
+          { name: "Kurta", price: 600 },
+          { name: "Alteration", price: 150 },
+          { name: "Lehenga", price: 1800 }
+        ],
+        location: { address: "Main Market", city: "Jaipur", state: "Rajasthan", pincode: "302001" },
+        workingHours: "10 AM - 8 PM",
+        verificationStatus: "pending"
+      });
+    }
 
     const [orders, dueSoon] = await Promise.all([
       Order.find({ tailorId: tailor._id }).populate("customerId", "name phone").sort({ dueDate: 1 }).limit(20),

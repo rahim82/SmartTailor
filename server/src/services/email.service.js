@@ -23,7 +23,8 @@ async function sendEmail({ to, subject, text, html, simulatorLabel }) {
   if (!to) return { success: false, skipped: true };
 
   if (!env.brevoApiKey || !env.brevoSenderEmail) {
-    throw new Error("Brevo email configuration is missing");
+    console.info(`[Email Service (${simulatorLabel || "NOTIFICATION"})] To: ${to} | Subject: ${subject} (Skipped - Brevo credentials not set)`);
+    return { success: true, skipped: true, simulated: true };
   }
 
   const response = await fetch("https://api.brevo.com/v3/smtp/email", {

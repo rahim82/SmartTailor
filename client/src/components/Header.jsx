@@ -4,16 +4,34 @@ import { LogOut, Scissors, Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { dashboardPath } from "../lib/routes.js";
 
-const navItems = [
-  { to: "/track", label: "Track Order" },
-  { to: "/customer", label: "Customer" },
-  { to: "/tailor", label: "Tailor" },
-  { to: "/admin", label: "Admin" }
+const publicNav = [
+  { to: "/track", label: "Track Order" }
 ];
 
 export default function Header() {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { to: "/track", label: "Track Order" },
+    ...(!user
+      ? [
+          { to: "/customer", label: "Customer" },
+          { to: "/tailor", label: "Tailor" },
+          { to: "/admin", label: "Admin" }
+        ]
+      : user.role === "customer"
+      ? [
+          { to: "/customer", label: "My Orders & Fittings" }
+        ]
+      : user.role === "tailor"
+      ? [
+          { to: "/tailor", label: "Workshop Dashboard" }
+        ]
+      : [
+          { to: "/admin", label: "Admin Portal" }
+        ])
+  ];
 
   return (
     <header className="sticky top-0 z-20 border-b border-black/5 bg-white/75 backdrop-blur-md shadow-sm">
@@ -32,7 +50,7 @@ export default function Header() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `rounded px-3 py-2 transition ${isActive ? "bg-ink text-white" : "text-ink/70 hover:bg-black/5"}`
+                  `rounded px-3 py-2 transition ${isActive ? "bg-ink text-white font-semibold" : "text-ink/70 hover:bg-black/5"}`
                 }
               >
                 {item.label}
@@ -41,13 +59,24 @@ export default function Header() {
           </nav>
           {user ? (
             <div className="flex items-center gap-2">
-              <Link to={dashboardPath(user.role)} className="hidden text-sm font-medium sm:block">{user.name}</Link>
-              <button onClick={logout} className="grid h-9 w-9 place-items-center rounded-md border border-black/10 bg-white" title="Logout">
+              <Link 
+                to={dashboardPath(user.role)} 
+                className="flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3.5 py-1.5 text-sm font-semibold text-ink shadow-xs hover:border-stitch/50 transition"
+              >
+                <span>{user.name}</span>
+              </Link>
+              <button 
+                onClick={logout} 
+                className="grid h-9 w-9 place-items-center rounded-md border border-black/10 bg-white text-ink/70 hover:text-red-600 hover:border-red-200 transition" 
+                title="Logout"
+              >
                 <LogOut size={16} />
               </button>
             </div>
           ) : (
-            <Link to="/auth" className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white">Login</Link>
+            <Link to="/auth" className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90 transition shadow-sm">
+              Login
+            </Link>
           )}
 
           {/* Mobile Menu Button */}
@@ -85,7 +114,7 @@ export default function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="rounded px-3 py-2.5 text-sm font-bold text-stitch hover:bg-black/5"
                 >
-                  {user.name} ({user.role.toUpperCase()})
+                  {user.name}
                 </Link>
               </div>
             )}
