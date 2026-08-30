@@ -4,6 +4,7 @@ import { Plus, Ruler, Upload, Scissors, CreditCard, ChevronRight, X, Star } from
 import PageShell from "../components/PageShell.jsx";
 import StatCard from "../components/StatCard.jsx";
 import OrderTable from "../components/OrderTable.jsx";
+import ImageUploader from "../components/ImageUploader.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
@@ -747,23 +748,13 @@ export default function CustomerDashboard() {
               </div>
 
               {/* Upload Fabric Design Section */}
-              <div>
-                <label className="block text-xs font-semibold text-ink/75">Fabric / Design Reference Image</label>
-                <div className="mt-1.5 flex items-center gap-3">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="text-xs text-ink/75 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-stitch/10 file:text-stitch hover:file:bg-stitch/20"
-                  />
-                  {uploading && <span className="text-xs text-ink/40 animate-pulse">Uploading to Cloudinary...</span>}
-                  {uploadedImage && (
-                    <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                      ✓ Upload Successful
-                    </span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Fabric / Design Reference Image"
+                value={uploadedImage}
+                onChange={setUploadedImage}
+                context={{ targetType: "orderDesignImage" }}
+                aspectHint="Upload pattern, sample dress, or fabric photo"
+              />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>

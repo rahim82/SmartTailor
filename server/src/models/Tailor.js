@@ -20,6 +20,8 @@ const tailorSchema = new mongoose.Schema(
       }
     },
     workingHours: String,
+    shopImageUrl: String,
+    shopImagePublicId: String,
     portfolioImages: [{ url: String, publicId: String }],
     ratingAvg: { type: Number, default: 0, index: true },
     totalReviews: { type: Number, default: 0 },

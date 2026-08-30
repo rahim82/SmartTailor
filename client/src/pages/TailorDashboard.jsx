@@ -3,6 +3,7 @@ import { CalendarDays, CheckCircle2, Scissors, Ruler, ChevronRight, X, Sparkles,
 import PageShell from "../components/PageShell.jsx";
 import StatCard from "../components/StatCard.jsx";
 import OrderTable from "../components/OrderTable.jsx";
+import ImageUploader from "../components/ImageUploader.jsx";
 import { api } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { compressImage, getOptimizedImageUrl } from "../lib/imageCompress.js";
@@ -302,6 +303,9 @@ export default function TailorDashboard() {
     e.preventDefault();
     try {
       const servicesArray = (profileForm.services || []).filter((s) => s.name && s.name.trim());
+      const portfolioImages = profileForm.shopImage 
+        ? [profileForm.shopImage] 
+        : (profileForm.shopImageUrl ? [{ url: profileForm.shopImageUrl, publicId: profileForm.shopImagePublicId }] : []);
 
       const payload = {
         shopName: profileForm.shopName,
@@ -314,7 +318,9 @@ export default function TailorDashboard() {
           pincode: profileForm.pincode
         },
         workingHours: profileForm.workingHours,
-        portfolioImages: profileForm.shopImageUrl ? [{ url: profileForm.shopImageUrl }] : []
+        shopImageUrl: profileForm.shopImage?.url || profileForm.shopImageUrl || "",
+        shopImagePublicId: profileForm.shopImage?.publicId || profileForm.shopImagePublicId || "",
+        portfolioImages
       };
 
       await api.post("/tailors/profile", payload);
@@ -590,21 +596,19 @@ export default function TailorDashboard() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-ink/75">Shop Profile Photo / Banner</label>
-              <div className="mt-1 flex items-center gap-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleShopImageUpload}
-                  className="text-xs text-ink/75 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-stitch/10 file:text-stitch hover:file:bg-stitch/20"
-                />
-                {uploadingImage && <span className="text-xs text-ink/40 animate-pulse">Uploading...</span>}
-                {profileForm.shopImageUrl && (
-                  <span className="text-xs text-emerald-600 font-semibold">✓ Photo Selected</span>
-                )}
-              </div>
-            </div>
+            <ImageUploader
+              label="Shop Profile Photo / Banner"
+              value={profileForm.shopImage || profileForm.shopImageUrl}
+              onChange={(img) => {
+                setProfileForm((prev) => ({
+                  ...prev,
+                  shopImage: img,
+                  shopImageUrl: img?.url || ""
+                }));
+              }}
+              context={{ targetType: "tailorShopImage" }}
+              aspectHint="Upload boutique logo, storefront, or banner photo"
+            />
 
             <div>
               <label className="block text-xs font-semibold text-ink/75">Description</label>
@@ -1099,21 +1103,19 @@ export default function TailorDashboard() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-ink/75">Shop Profile Photo / Banner</label>
-                <div className="mt-1 flex items-center gap-3">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleShopImageUpload}
-                    className="text-xs text-ink/75 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-stitch/10 file:text-stitch hover:file:bg-stitch/20"
-                  />
-                  {uploadingImage && <span className="text-xs text-ink/40 animate-pulse">Uploading...</span>}
-                  {profileForm.shopImageUrl && (
-                    <span className="text-xs text-emerald-600 font-semibold">✓ Photo Selected</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Shop Profile Photo / Banner"
+                value={profileForm.shopImage || profileForm.shopImageUrl}
+                onChange={(img) => {
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    shopImage: img,
+                    shopImageUrl: img?.url || ""
+                  }));
+                }}
+                context={{ targetType: "tailorShopImage" }}
+                aspectHint="Upload boutique logo, storefront, or banner photo"
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-ink/75">Description</label>
