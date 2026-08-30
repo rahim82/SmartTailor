@@ -20,12 +20,10 @@ export default function AuthPage() {
   const { user, login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const googleButtonRef = useRef(null);
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   // If already logged in, redirect directly to user role dashboard
   useEffect(() => {
-    if (user && !busy) {
+    if (user && !busy && user.role) {
       navigate(dashboardPath(user.role), { replace: true });
     }
   }, [user, navigate, busy]);
@@ -34,75 +32,33 @@ export default function AuthPage() {
   const [customGoogleEmail, setCustomGoogleEmail] = useState("");
   const [customGoogleName, setCustomGoogleName] = useState("");
 
-  // Load Google Identity Services SDK
+  // Load Google Identity Services SDK safely
   useEffect(() => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!googleClientId) return;
+
     if (!document.getElementById("google-gsi-script")) {
       const script = document.createElement("script");
       script.id = "google-gsi-script";
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        if (googleClientId && window.google?.accounts?.id && googleButtonRef.current) {
-          window.google.accounts.id.initialize({
-            client_id: googleClientId,
-            callback: (res) => handleGoogleSuccess(res)
-          });
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            theme: "outline",
-            size: "large",
-            width: 380,
-            text: mode === "login" ? "signin_with" : "signup_with"
-          });
-        }
-      };
       document.body.appendChild(script);
-    } else if (googleClientId && window.google?.accounts?.id && googleButtonRef.current) {
-      window.google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: (res) => handleGoogleSuccess(res)
-      });
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
-        theme: "outline",
-        size: "large",
-        width: 380,
-        text: mode === "login" ? "signin_with" : "signup_with"
-      });
     }
-  }, [googleClientId, mode]);
-
-  async function handleGoogleSuccess(credentialResponse) {
-    try {
-      setBusy(true);
-      setError("");
-      const authUser = await googleLogin({
-        credential: credentialResponse.credential,
-        role: mode === "register" ? role : undefined
-      });
-      navigate(dashboardPath(authUser?.role || "customer"), { 
-        replace: true, 
-        state: { selectedTailorId: location.state?.selectedTailorId } 
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || "Google sign-in failed. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
+  }, []);
 
   async function handleGoogleSignInClick() {
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     
-    // 1. Try real Google OAuth popup if client ID & oauth2 client available
+    // 1. If Google OAuth2 client available with valid Client ID, use popup
     if (googleClientId && window.google?.accounts?.oauth2) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: googleClientId,
           scope: "email profile openid",
           callback: async (tokenResponse) => {
-            if (tokenResponse.error) {
-              setError("Google sign-in was cancelled or failed.");
+            if (!tokenResponse || tokenResponse.error) {
+              setError("Google sign-in was cancelled.");
               return;
             }
             try {
@@ -123,7 +79,7 @@ export default function AuthPage() {
                 state: { selectedTailorId: location.state?.selectedTailorId } 
               });
             } catch (err) {
-              setError(err.response?.data?.message || "Failed to process Google sign-in.");
+              setError(err.response?.data?.message || "Failed to complete Google sign-in.");
             } finally {
               setBusy(false);
             }
@@ -132,11 +88,11 @@ export default function AuthPage() {
         tokenClient.requestAccessToken({ prompt: "select_account" });
         return;
       } catch (err) {
-        console.warn("OAuth2 token client error, falling back to modal:", err);
+        console.warn("Google OAuth popup error:", err);
       }
     }
 
-    // 2. Interactive Google Account Picker Modal (always works instantly)
+    // 2. Open interactive Google Account Chooser Modal (always works instantly)
     setShowGoogleModal(true);
   }
 
@@ -333,9 +289,6 @@ export default function AuthPage() {
             </svg>
             <span>{mode === "login" ? "Sign in with Google" : "Sign up with Google"}</span>
           </button>
-          {/* Optional GIS Button render container */}
-          <div ref={googleButtonRef} className="hidden" />
-
           {mode === "login" && (
             <button type="button" onClick={() => navigate("/forgot-password")} className="w-full text-sm font-medium text-stitch hover:underline pt-1">
               Forgot password?
